@@ -224,3 +224,17 @@
   .r-right{ align-self: flex-end; }
   .order-actions{ flex-direction: column; }
 }
+
+@media (max-width: 520px){
+  .order-page{ padding: 18px 12px 50px; }
+  .order-title{ font-size: 26px; }
+  .order-card{ padding: 16px; }
+  .receipt{ padding: 12px; }
+  .info-row{ flex-wrap: wrap; gap: 6px; }
+  .info-row b{ word-break: break-word; }
+}
+
+@media (max-width: 380px){
+  .order-title{ font-size: 22px; }
+  .order-page{ padding: 14px 10px 40px; }
+}

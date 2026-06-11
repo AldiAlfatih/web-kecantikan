@@ -681,10 +681,10 @@ body {
   .product{ padding: 44px 26px; }
   .product-list{ grid-template-columns: repeat(2, 1fr); }
   .hero-text{ max-width: 58%; }
+  .footer{ padding: 36px 32px 18px; }
 }
 
 @media (max-width: 760px){
-  .nav-menu{ display:none; } /* optional: simple untuk mobile */
   .hero{
     flex-direction: column;
     text-align: center;
@@ -692,14 +692,28 @@ body {
   .hero-text{ max-width: 100%; }
   .hero-btn{ justify-content: center; }
   .hero-image{ margin-top: 14px; }
-  .product-list{ grid-template-columns: 1fr; }
+  .product-list{ grid-template-columns: repeat(2, 1fr); }
   .section-header{ align-items: flex-start; }
+  .footer-container{
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .footer{ padding: 30px 20px 16px; }
 }
 
 @media (max-width: 520px){
   .hero{ padding: 36px 16px; }
-  .hero-text h1{ font-size: 30px; }
-  .product{ padding: 36px 16px; }
-  .home-user-hero{ padding: 40px 16px; }
-  .home-user-hero h1{ font-size: 26px; }
+  .hero-text h1{ font-size: 28px; }
+  .product{ padding: 30px 14px; }
+  .home-user-hero{ padding: 36px 14px; }
+  .home-user-hero h1{ font-size: 24px; }
+  .product-list{ grid-template-columns: 1fr; }
+  .section-header{ flex-direction: column; align-items: flex-start; gap: 10px; }
+  .card img{ width: 120px; height: 120px; }
+  .footer-container{
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .footer{ padding: 24px 16px 14px; }
+  .footer-bottom{ margin-top: 20px; font-size: 12px; }
 }

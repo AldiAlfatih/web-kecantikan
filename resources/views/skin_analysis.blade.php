@@ -19,10 +19,6 @@
 <section class="tryon-page">
 
   <header class="tryon-head">
-    <div class="mini-pill" style="margin-bottom: 14px;">
-      <span class="dot"></span>
-      AI · Client-Side · Real-Time
-    </div>
     <h1 class="tryon-title">Skin Tone <span>AI</span></h1>
     <p class="tryon-subtitle" style="max-width: 600px; margin: 0 auto; line-height: 1.6;">
       Aktifkan kamera, posisikan wajahmu di dalam oval, dan biarkan AI mendeteksi warna kulitmu 
@@ -91,7 +87,7 @@
       </div>
 
       <p class="camera-note">
-        * Proses AI berjalan 100% di browser — privasi data kamera terjamin.
+        * Simulasi warna berbasis shade. Hasil bisa berbeda karena pencahayaan kamera.
       </p>
 
     </div>

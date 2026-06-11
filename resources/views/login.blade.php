@@ -34,9 +34,9 @@
         <button type="submit" class="btn-login-main">Login</button>
 
         {{-- ✅ tombol admin ke filament --}}
-        <a href="{{ route('filament.admin.auth.login') }}" class="btn-admin-link">
+        <!-- <a href="{{ route('filament.admin.auth.login') }}" class="btn-admin-link">
           Login sebagai Admin
-        </a>
+        </a> -->
       </form>
 
       <p class="register-text">

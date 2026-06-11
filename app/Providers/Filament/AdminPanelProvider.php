@@ -28,8 +28,12 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandName('FaceShop')
+            ->brandLogo(fn () => view('filament.logo'))
+            ->brandLogoHeight('38px')
+            ->sidebarCollapsibleOnDesktop()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::hex('#e65b7a'),
             ])
             ->discoverResources(
                 in: app_path('Filament/Resources'),

@@ -423,3 +423,16 @@
   .summary-card{ position: static; }
   .transfer-grid{ grid-template-columns: 1fr; }
 }
+
+@media (max-width: 768px){
+  .checkout-page{ padding: 24px 16px 50px; }
+  .checkout-title{ font-size: 38px; }
+  .grid-2{ grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px){
+  .checkout-title{ font-size: 30px; }
+  .checkout-page{ padding: 18px 12px 40px; }
+  .checkout-card, .summary-card{ padding: 16px; }
+  .section-box{ padding: 12px; }
+}

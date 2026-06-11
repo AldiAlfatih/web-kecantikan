@@ -213,3 +213,18 @@
   .profile-wrapper{ grid-template-columns: 1fr; }
   .pill-grid{ grid-template-columns: repeat(2,1fr); }
 }
+
+@media (max-width: 600px){
+  .profile-section{ padding: 20px 14px 50px; }
+  .profile-title{ font-size: 24px; }
+  .pill-grid{ grid-template-columns: repeat(2, 1fr); }
+  .grid-2{ grid-template-columns: 1fr; }
+  .profile-tabs{ flex-wrap: wrap; gap: 8px; }
+  .tab{ font-size: 12.5px; padding: 8px 14px; }
+}
+
+@media (max-width: 400px){
+  .profile-section{ padding: 16px 10px 40px; }
+  .pill-grid{ grid-template-columns: 1fr; }
+  .profile-card{ padding: 16px; }
+}

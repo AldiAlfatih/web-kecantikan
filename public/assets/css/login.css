@@ -136,3 +136,15 @@
 .login-section + *{
   margin-top: 0 !important;
 }
+
+/* RESPONSIVE */
+@media (max-width: 480px){
+  .login-section{ padding: 36px 14px; }
+  .login-wrapper h1{ font-size: 24px; }
+  .login-card{ padding: 20px 16px; }
+}
+
+@media (max-width: 380px){
+  .login-wrapper h1{ font-size: 20px; }
+  .login-section{ padding: 24px 10px; }
+}

@@ -233,3 +233,16 @@ input::-webkit-inner-spin-button {
     grid-column: auto;
   }
 }
+
+@media (max-width: 520px) {
+  .daftar-section{ padding: 36px 14px; }
+  .daftar-wrapper h1{ font-size: 24px; }
+  .daftar-card{ padding: 18px; }
+  .daftar-card h2{ font-size: 18px; }
+}
+
+@media (max-width: 380px) {
+  .daftar-section{ padding: 24px 10px; }
+  .daftar-wrapper h1{ font-size: 20px; }
+  .daftar-card{ padding: 14px; }
+}

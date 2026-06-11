@@ -486,11 +486,29 @@
   background: rgba(214,106,134,.18);
   border-color: rgba(125,16,48,.18);
 }
-
-
 /* RESPONSIVE */
 @media (max-width: 1100px){
   .tryon-page{ padding: 30px 24px 60px; }
   .tryon-wrap{ grid-template-columns: 1fr; }
   .product-card{ position: static; }
+}
+
+@media (max-width: 768px){
+  .tryon-page{ padding: 22px 16px 50px; }
+  .tryon-title{ font-size: 38px; }
+  .camera-area{ min-height: 320px; }
+  .camera-oval{ width: 180px; height: 230px; }
+  .tryon-quick-links{ grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px){
+  .tryon-title{ font-size: 30px; }
+  .tryon-page{ padding: 18px 12px 40px; }
+  .tryon-card{ padding: 16px; }
+  .camera-area{ min-height: 280px; }
+  .camera-oval{ width: 160px; height: 210px; }
+  .camera-actions{ grid-template-columns: 1fr; gap: 10px; }
+  .shade-list{ gap: 8px; }
+  .shade-item{ padding: 7px 10px; font-size: 11px; }
+  .shade-dot{ width: 14px; height: 14px; }
 }
