@@ -12,8 +12,10 @@
 
         @auth
             <a href="{{ route('rekomendasi') }}">Rekomendasi</a>
+            <a href="{{ route('skin.analysis') }}">Skin Tone AI</a>
         @else
             <a href="{{ route('login') }}">Rekomendasi</a>
+            <a href="{{ route('login') }}">Skin Tone AI</a>
         @endauth
     </nav>
 

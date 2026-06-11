@@ -1,27 +1,22 @@
 /**
- * skin_analysis.js — v3 (MediaPipe Integration)
- * Fase 3 — AI / Computer Vision Developer
+ * skin_analysis.js
+ * Fase 4 — AR Canvas Developer
  *
- * Orchestrator utama halaman /skin-analysis.
- * Menggabungkan:
- *  - FaceDetectorModule  (face_detector.js)
- *  - SkinColorAnalyzer   (skin_color_analyzer.js)
- *  - Kamera browser (getUserMedia)
- *  - UI state machine (waiting → live → detecting → analyzing → results)
- *  - Backend API calls (/api/skin-recommend & /api/skin-save)
- *
- * Tidak ada perubahan pada backend.
+ * Orchestrator utama halaman Skin Tone AI.
+ * Menggabungkan: FaceDetectorModule, SkinColorAnalyzer, dan ARCanvasModule.
  */
 
 (function () {
   'use strict';
 
   /* ══════════════════════════════════════════════════════════
-     ELEMENT REFERENCES
+     DOM ELEMENTS
   ══════════════════════════════════════════════════════════ */
   const video           = document.getElementById('saVideo');
   const canvas          = document.getElementById('saCanvas');
   const cameraEmpty     = document.getElementById('saCameraEmpty');
+  const cameraArea      = document.getElementById('saCameraArea');
+  
   const statusOverlay   = document.getElementById('saStatusOverlay');
   const statusText      = document.getElementById('saStatusText');
   const pillDot         = document.getElementById('saPillDot');
@@ -30,14 +25,15 @@
   const btnStart        = document.getElementById('saBtnStart');
   const btnStop         = document.getElementById('saBtnStop');
   const btnFlip         = document.getElementById('saBtnFlip');
+  
   const btnAnalyzeWrap  = document.getElementById('saBtnAnalyzeWrap');
   const btnAnalyze      = document.getElementById('saBtnAnalyze');
   const btnRetake       = document.getElementById('saBtnRetake');
   const btnSave         = document.getElementById('saBtnSave');
 
   const panelWaiting    = document.getElementById('saPanelWaiting');
-  const panelResult     = document.getElementById('saPanelResult');
   const panelSkeleton   = document.getElementById('saPanelSkeleton');
+  const panelResult     = document.getElementById('saPanelResult');
   const panelSaveSuccess= document.getElementById('saSaveSuccess');
 
   const toneSwatchEl    = document.getElementById('saToneSwatch');
@@ -46,468 +42,329 @@
   const savePrompt      = document.getElementById('saSavePrompt');
   const rekomList       = document.getElementById('saRekomList');
 
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+
   /* ══════════════════════════════════════════════════════════
      STATE
   ══════════════════════════════════════════════════════════ */
   let stream              = null;
   let facingMode          = 'user';
-  let latestLandmarks     = null;   // landmark terakhir dari MediaPipe
-  let stableFrameCount    = 0;      // jumlah frame berturut-turut dengan wajah
-  let detectorStarted     = false;  // sudah mulai face detection?
-  let analysisResult      = null;   // hasil terakhir { skin_tone_level, undertone, hex }
+  let latestLandmarks     = null;
+  let stableFrameCount    = 0;
+  let detectorStarted     = false;
+  
+  let currentPhase        = 'WAITING'; // WAITING | DETECTING | ANALYZING | RESULT
+  let analysisResult      = null;      // { skin_tone_level, undertone, hex }
+  let activeARShade       = null;      // Hex color untuk foundation AR mask
 
-  const STABLE_THRESHOLD  = 10;     // frame stabil sebelum "Analisis" bisa diklik
-
-  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+  const STABLE_THRESHOLD  = 10;
 
   /* ══════════════════════════════════════════════════════════
-     CANVAS RESIZE
-     Canvas internal resolution harus match ukuran container CSS
-     agar koordinat overlay tepat.
+     CANVAS SIZING
   ══════════════════════════════════════════════════════════ */
   function syncCanvasSize() {
-    if (!canvas) return;
-    const area = document.getElementById('saCameraArea');
-    if (area) {
-      canvas.width  = area.clientWidth;
-      canvas.height = area.clientHeight;
-    }
+    if (!canvas || !cameraArea) return;
+    // Paskan canvas dengan ukuran kontainer
+    canvas.width  = cameraArea.clientWidth;
+    canvas.height = cameraArea.clientHeight;
   }
-
-  // Sync setiap kali video metadata berubah (resolusi, dsb.)
-  video?.addEventListener('loadedmetadata', syncCanvasSize);
   window.addEventListener('resize', syncCanvasSize);
+  video?.addEventListener('loadedmetadata', syncCanvasSize);
 
   /* ══════════════════════════════════════════════════════════
-     CAMERA
+     CAMERA CONTROL
   ══════════════════════════════════════════════════════════ */
   async function startCamera() {
     if (btnStart) btnStart.disabled = true;
     setStatus('Meminta akses kamera...', true);
 
     try {
-      // Hentikan stream sebelumnya jika ada
-      if (stream) stopStreamTracks();
-
+      if (stream) stopStream();
       stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: facingMode },
-          width:  { ideal: 1280 },
-          height: { ideal: 720 },
-        },
+        video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false,
       });
 
       video.srcObject = stream;
-      video.style.display  = 'block';
+      video.style.display = 'block';
       canvas.style.display = 'block';
-      cameraEmpty.style.display = 'none';
+      if (cameraEmpty) cameraEmpty.style.display = 'none';
 
       await video.play();
       syncCanvasSize();
 
-      // Update pill
-      btnStop.disabled = false;
-      pillDot.classList.add('active');
-      pillLabel.textContent = 'Kamera Aktif';
+      if (btnStop) btnStop.disabled = false;
+      if (pillDot) pillDot.style.background = '#22c55e';
+      if (pillDot) pillDot.style.boxShadow = '0 0 0 4px rgba(34,197,94,0.15)';
+      if (pillLabel) pillLabel.textContent = 'Kamera Aktif';
 
-      // Mulai MediaPipe face detection
+      currentPhase = 'DETECTING';
       startFaceDetection();
 
     } catch (err) {
-      console.error('[SA] Camera error:', err);
+      console.error(err);
       if (btnStart) btnStart.disabled = false;
-      setStatus('', false);
+      setStatus('Gagal mengakses kamera.', false);
+    }
+  }
 
-      let msg = 'Tidak bisa mengakses kamera.';
-      if (err.name === 'NotAllowedError')
-        msg = 'Izin kamera ditolak. Klik ikon 🔒 di address bar lalu aktifkan izin.';
-      else if (err.name === 'NotFoundError')
-        msg = 'Kamera tidak ditemukan di perangkat ini.';
-      else if (err.name === 'NotReadableError')
-        msg = 'Kamera sedang digunakan aplikasi lain. Tutup aplikasi lain lalu coba lagi.';
-
-      showCameraEmpty('⚠️', 'Kamera tidak bisa diakses', msg);
+  function stopStream() {
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
     }
   }
 
   function stopCamera() {
-    stopStreamTracks();
+    stopStream();
     FaceDetectorModule.stopDetection();
     SkinColorAnalyzer.clearCanvas(canvas);
 
-    video.style.display   = 'none';
-    canvas.style.display  = 'none';
-    video.srcObject       = null;
-
-    showCameraEmpty('📷', 'Kamera tidak aktif', 'Tekan tombol di bawah untuk memulai.');
+    video.style.display = 'none';
+    canvas.style.display = 'none';
+    video.srcObject = null;
+    if (cameraEmpty) cameraEmpty.style.display = 'flex';
 
     if (btnStart) btnStart.disabled = false;
-    if (btnStop)  btnStop.disabled  = true;
+    if (btnStop) btnStop.disabled = true;
     if (btnAnalyzeWrap) btnAnalyzeWrap.style.display = 'none';
+    
+    if (pillDot) pillDot.style.background = '#7d1030';
+    if (pillDot) pillDot.style.boxShadow = '0 0 0 4px rgba(125,16,48,0.1)';
+    if (pillLabel) pillLabel.textContent = 'Live Preview';
 
-    pillDot.classList.remove('active');
-    pillLabel.textContent = 'Live Preview';
-
-    // Reset detection state
-    latestLandmarks  = null;
+    latestLandmarks = null;
     stableFrameCount = 0;
-    detectorStarted  = false;
+    detectorStarted = false;
+    currentPhase = 'WAITING';
+    activeARShade = null;
     setStatus('', false);
   }
 
-  function stopStreamTracks() {
-    if (!stream) return;
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-  }
-
-  function flipCamera() {
-    facingMode = facingMode === 'user' ? 'environment' : 'user';
-    if (stream) startCamera();
-  }
-
-  function showCameraEmpty(ico, title, sub) {
-    if (!cameraEmpty) return;
-    cameraEmpty.style.display = 'flex';
-    cameraEmpty.innerHTML     = `
-      <div class="sa-empty-ico">${ico}</div>
-      <p class="sa-empty-title">${title}</p>
-      <p class="sa-empty-sub">${sub}</p>
-    `;
-  }
-
   /* ══════════════════════════════════════════════════════════
-     FACE DETECTION — MediaPipe Integration
-
-     Flow:
-     1. startCamera() → startFaceDetection()
-     2. FaceDetectorModule loads MediaPipe CDN (lazy)
-     3. onLoading → tampilkan pesan loading ke user
-     4. onReady   → model siap, deteksi dimulai
-     5. onFace(landmarks) per-frame:
-        - update latestLandmarks
-        - gambar face oval di canvas (hijau kalau stabil)
-        - setelah STABLE_THRESHOLD frame → tampilkan tombol Analisis
-     6. onNoFace → clear canvas, reset counter
+     FACE DETECTION & RENDERING LOOP
   ══════════════════════════════════════════════════════════ */
   function startFaceDetection() {
     if (detectorStarted) return;
     detectorStarted = true;
 
     FaceDetectorModule.startDetection(video, {
-
-      onLoading: (msg) => {
-        setStatus(msg, true);
-      },
-
-      onReady: () => {
-        setStatus('Arahkan wajah ke kamera...', false);
-      },
-
+      onLoading: (msg) => setStatus(msg, true),
+      onReady: () => setStatus('Arahkan wajah ke kamera...', false),
       onFace: (landmarks) => {
         latestLandmarks = landmarks;
-        stableFrameCount++;
+        
+        if (currentPhase === 'DETECTING') {
+          stableFrameCount++;
+          const stable = stableFrameCount >= STABLE_THRESHOLD;
+          ARCanvasModule.drawDebugPoints(canvas, landmarks, video, stable);
 
-        // Gambar overlay setiap frame ada wajah
-        const stable = stableFrameCount >= STABLE_THRESHOLD;
-        SkinColorAnalyzer.drawFaceOverlay(canvas, landmarks, video, stable);
-
-        if (stable) {
-          // Tampilkan tombol analisis begitu wajah stabil
-          if (btnAnalyzeWrap) btnAnalyzeWrap.style.display = 'block';
-          setStatus('✓ Wajah terdeteksi — siap dianalisis', false);
-        } else {
-          setStatus('Mendeteksi wajah...', true);
+          if (stable) {
+            if (btnAnalyzeWrap) btnAnalyzeWrap.style.display = 'block';
+            setStatus('✓ Wajah siap dianalisis', false);
+          } else {
+            setStatus('Mendeteksi wajah...', true);
+          }
+        } 
+        else if (currentPhase === 'RESULT' || currentPhase === 'ANALYZING') {
+          // Jika sudah hasil, gambar AR Mask
+          ARCanvasModule.drawARFoundation(canvas, landmarks, video, activeARShade);
         }
       },
-
       onNoFace: () => {
-        // Reset penghitung stabilitas
         stableFrameCount = 0;
-        latestLandmarks  = null;
-
+        latestLandmarks = null;
         SkinColorAnalyzer.clearCanvas(canvas);
         if (btnAnalyzeWrap) btnAnalyzeWrap.style.display = 'none';
-        setStatus('Wajah tidak terdeteksi — pastikan pencahayaan cukup', false);
+        setStatus('Wajah tidak terdeteksi.', false);
       },
-
       onError: (msg) => {
-        setStatus('', false);
-        showCameraEmpty(
-          '⚠️',
-          'AI gagal dimuat',
-          'Gagal memuat MediaPipe: ' + msg + '. Coba refresh halaman.'
-        );
-      },
+        setStatus('Gagal memuat AI: ' + msg, false);
+      }
     });
   }
 
   /* ══════════════════════════════════════════════════════════
-     ANALISIS — Menggunakan landmark MediaPipe + IF-THEN rules
+     ANALISIS WARNA KULIT
   ══════════════════════════════════════════════════════════ */
   async function runAnalysis() {
-    if (!stream) {
-      alert('Aktifkan kamera terlebih dahulu!');
-      return;
-    }
+    if (!latestLandmarks) return alert('Wajah belum terdeteksi sempurna.');
 
-    if (!latestLandmarks) {
-      alert('Pastikan wajah Anda terlihat jelas di kamera, dengan pencahayaan yang cukup.');
-      return;
-    }
-
+    currentPhase = 'ANALYZING';
     setStatus('Menganalisis warna kulit...', true);
-    showAnalyzingState();
+    
+    if (panelWaiting) panelWaiting.style.display = 'none';
+    if (panelResult) panelResult.style.display = 'none';
+    if (panelSkeleton) panelSkeleton.style.display = 'block';
+    if (btnAnalyzeWrap) btnAnalyzeWrap.style.display = 'none';
 
-    // ─ Sampling warna dari landmark MediaPipe ─────────────────
+    // 1. Pixel Sampling (Dari skin_color_analyzer.js)
     const sampled = SkinColorAnalyzer.sampleSkinColor(video, latestLandmarks);
-
-    let skin_tone_level, undertone, hex;
+    let skin_tone_level = 3, undertone = 'neutral', hex = '#C8A882';
 
     if (sampled && sampled.r > 0) {
-      const classified = SkinColorAnalyzer.classify(sampled.r, sampled.g, sampled.b);
-      skin_tone_level  = classified.skin_tone_level;
-      undertone        = classified.undertone;
-      hex              = sampled.hex;
-
-      console.info('[SA] Analisis warna kulit:', {
-        rgb: `rgb(${sampled.r},${sampled.g},${sampled.b})`,
-        hex,
-        hsv: `h=${classified.h}° s=${(classified.s * 100).toFixed(1)}% v=${(classified.v * 100).toFixed(1)}%`,
-        skin_tone_level,
-        undertone,
-      });
-    } else {
-      // Fallback jika sampling gagal (pencahayaan sangat buruk)
-      console.warn('[SA] Pixel sampling gagal, menggunakan nilai fallback.');
-      skin_tone_level = 3;
-      undertone       = 'neutral';
-      hex             = '#C8A882';
+      const cls = SkinColorAnalyzer.classify(sampled.r, sampled.g, sampled.b);
+      skin_tone_level = cls.skin_tone_level;
+      undertone = cls.undertone;
+      hex = sampled.hex;
     }
 
     analysisResult = { skin_tone_level, undertone, hex };
+    
+    // Set background outer oval ke warna kulit user
+    if (cameraArea) cameraArea.style.setProperty('--shade', hex);
 
-    // ─ Fetch rekomendasi dari backend ─────────────────────────
-    await fetchRecommendations(skin_tone_level, undertone, hex);
-  }
-
-  /* ══════════════════════════════════════════════════════════
-     API CALLS (Backend tidak diubah)
-  ══════════════════════════════════════════════════════════ */
-  async function fetchRecommendations(toneLevel, undertone, hex) {
+    // 2. Fetch API Rekomendasi
     try {
       const resp = await fetch(window.__SA_ROUTES__.recommend, {
-        method : 'POST',
-        headers: {
-          'Content-Type' : 'application/json',
-          'X-CSRF-TOKEN' : csrfToken,
-          'Accept'       : 'application/json',
-        },
-        body: JSON.stringify({ skin_tone_level: toneLevel, undertone }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        body: JSON.stringify({ skin_tone_level, undertone })
       });
-
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
-
-      setStatus('', false);
-      data.success ? showResultState(data, hex) : showResultError();
-
-    } catch (err) {
-      console.error('[SA] API error:', err);
-      setStatus('', false);
-      showResultError();
-    }
-  }
-
-  async function saveProfile() {
-    if (!analysisResult) return;
-
-    if (btnSave) {
-      btnSave.disabled    = true;
-      btnSave.textContent = 'Menyimpan...';
-    }
-
-    try {
-      const resp = await fetch(window.__SA_ROUTES__.save, {
-        method : 'POST',
-        headers: {
-          'Content-Type' : 'application/json',
-          'X-CSRF-TOKEN' : csrfToken,
-          'Accept'       : 'application/json',
-        },
-        body: JSON.stringify({
-          skin_tone_level: analysisResult.skin_tone_level,
-          undertone      : analysisResult.undertone,
-          hex_sample     : analysisResult.hex,
-        }),
-      });
-
-      const data = await resp.json();
-
+      
       if (data.success) {
-        if (savePrompt)       savePrompt.style.display = 'none';
-        if (panelSaveSuccess) panelSaveSuccess.classList.add('visible');
+        showResults(data, hex);
       } else {
-        throw new Error('Save returned success:false');
+        throw new Error('API return false');
       }
-
-    } catch (err) {
-      console.error('[SA] Save error:', err);
-      if (btnSave) {
-        btnSave.disabled    = false;
-        btnSave.textContent = 'Simpan';
-      }
-      alert('Gagal menyimpan profil. Periksa koneksi internet lalu coba lagi.');
+    } catch (e) {
+      console.error(e);
+      setStatus('Gagal mengambil rekomendasi', false);
     }
   }
 
-  /* ══════════════════════════════════════════════════════════
-     STATUS OVERLAY
-  ══════════════════════════════════════════════════════════ */
-  function setStatus(text, showSpinner = true) {
-    if (!statusOverlay || !statusText) return;
+  function showResults(data, userHex) {
+    currentPhase = 'RESULT';
+    setStatus('', false);
 
-    if (!text) {
-      statusOverlay.classList.remove('visible');
-      return;
-    }
+    if (panelSkeleton) panelSkeleton.style.display = 'none';
+    if (panelResult) panelResult.style.display = 'flex';
+    if (savePrompt) savePrompt.style.display = 'flex';
+    if (panelSaveSuccess) panelSaveSuccess.style.display = 'none';
 
-    statusText.textContent = text;
-
-    const spinner = statusOverlay.querySelector('.sa-spinner');
-    if (spinner) spinner.style.display = showSpinner ? 'inline-block' : 'none';
-
-    statusOverlay.classList.add('visible');
-  }
-
-  /* ══════════════════════════════════════════════════════════
-     UI STATE MACHINE
-     waiting → skeleton → result / error
-  ══════════════════════════════════════════════════════════ */
-  function showAnalyzingState() {
-    panelWaiting?.style.setProperty('display', 'none');
-    panelResult?.style.setProperty('display', 'none');
-    panelSkeleton?.style.setProperty('display', 'flex');
-  }
-
-  function showResultState(data, hex) {
-    panelWaiting?.style.setProperty('display', 'none');
-    panelSkeleton?.style.setProperty('display', 'none');
-    panelResult?.style.setProperty('display', 'block');
-
-    // Perbarui swatch & label
-    if (toneSwatchEl)     toneSwatchEl.style.background   = hex;
-    if (toneLabelEl)      toneLabelEl.textContent          = data.tone_label ?? '–';
-    if (toneUndertoneEl)  toneUndertoneEl.textContent      = 'Undertone: ' + (data.undertone_label ?? '–');
-
-    // Tampilkan save prompt
-    if (savePrompt)       savePrompt.style.display         = 'flex';
-    if (panelSaveSuccess) panelSaveSuccess.classList.remove('visible');
+    if (toneSwatchEl) toneSwatchEl.style.background = userHex;
+    if (toneLabelEl) toneLabelEl.textContent = data.tone_label ?? '–';
+    if (toneUndertoneEl) toneUndertoneEl.textContent = 'Undertone: ' + (data.undertone_label ?? '–');
 
     renderRekomendasi(data.recommendations ?? []);
   }
 
-  function showResultError() {
-    panelWaiting?.style.setProperty('display', 'none');
-    panelSkeleton?.style.setProperty('display', 'none');
-    panelResult?.style.setProperty('display', 'block');
-
-    if (rekomList) {
-      rekomList.innerHTML = `
-        <div class="sa-rekom-empty">
-          ⚠️ Gagal mengambil rekomendasi.<br>
-          Pastikan internet aktif lalu coba ulangi.
-        </div>
-      `;
-    }
-  }
-
   /* ══════════════════════════════════════════════════════════
-     RENDER PRODUK REKOMENDASI
+     UI RENDER & EVENT LISTENERS
   ══════════════════════════════════════════════════════════ */
   function renderRekomendasi(items) {
     if (!rekomList) return;
 
     if (!items.length) {
-      rekomList.innerHTML = `
-        <div class="sa-rekom-empty">
-          Tidak ada produk yang cocok saat ini.<br>
-          Coba dengan pencahayaan yang lebih terang.
-        </div>
-      `;
+      rekomList.innerHTML = `<div class="sa-rekom-empty">Belum ada produk yang cocok dengan warna kulit ini.</div>`;
+      activeARShade = null;
       return;
     }
 
-    rekomList.innerHTML = items.map(item => `
-      <a class="sa-rekom-item"
-         href="${item.product.url_detail}"
-         data-tryon-url="${item.product.url_tryon}">
-        <span class="sa-rekom-shade-dot"
-              style="background:${item.hex_color};"></span>
-        <span class="sa-rekom-item-info">
+    rekomList.innerHTML = items.map((item, index) => `
+      <div class="sa-rekom-item" data-hex="${item.hex_color}" style="${index === 0 ? 'border-color:#e65b7a; background:rgba(230,91,122,0.05);' : ''}">
+        <div class="sa-rekom-shade-dot" style="background:${item.hex_color};"></div>
+        <div class="sa-rekom-item-info">
           <span class="sa-rekom-item-brand">${item.product.brand ?? ''}</span>
           <span class="sa-rekom-item-name">${item.product.name}</span>
-          <span class="sa-rekom-item-shade">${item.shade_name} · ${cap(item.undertone)}</span>
-        </span>
-        <span class="sa-rekom-item-price">${item.product.price_formatted}</span>
-      </a>
+          <span class="sa-rekom-item-shade">${item.shade_name} · ${item.undertone}</span>
+        </div>
+        <div class="sa-rekom-item-price">${item.product.price_formatted}</div>
+      </div>
     `).join('');
 
-    // Try-On button → produk pertama
-    updateTryOnBtn(items[0]?.product?.url_tryon);
+    // Jadikan item pertama sebagai AR default
+    activeARShade = items[0].hex_color;
 
-    // Klik item → ganti Try-On button
-    rekomList.addEventListener('click', e => {
-      const row = e.target.closest('.sa-rekom-item');
-      if (!row) return;
-
-      // Highlight baris terpilih
-      document.querySelectorAll('.sa-rekom-item').forEach(el => {
-        el.style.outline      = '';
-        el.style.outlineOffset = '';
+    // Klik untuk ganti AR shade
+    rekomList.querySelectorAll('.sa-rekom-item').forEach(el => {
+      el.addEventListener('click', (e) => {
+        // Reset styles
+        rekomList.querySelectorAll('.sa-rekom-item').forEach(i => {
+          i.style.borderColor = 'rgba(0,0,0,0.08)';
+          i.style.background = '#fff';
+        });
+        // Active styles
+        el.style.borderColor = '#e65b7a';
+        el.style.background = 'rgba(230,91,122,0.05)';
+        
+        // Update AR Overlay
+        activeARShade = el.getAttribute('data-hex');
       });
-      row.style.outline       = '2px solid #e65b7a';
-      row.style.outlineOffset = '-2px';
-
-      updateTryOnBtn(row.dataset.tryonUrl);
     });
   }
 
-  function updateTryOnBtn(url) {
-    const btn = document.getElementById('saBtnTryOn');
-    if (btn && url) btn.href = url;
+  function setStatus(text, showSpinner = true) {
+    if (!statusOverlay || !statusText) return;
+    if (!text) {
+      statusOverlay.classList.remove('visible');
+      return;
+    }
+    statusText.textContent = text;
+    const spinner = statusOverlay.querySelector('.sa-spinner');
+    if (spinner) spinner.style.display = showSpinner ? 'inline-block' : 'none';
+    statusOverlay.classList.add('visible');
   }
 
-  /* ══════════════════════════════════════════════════════════
-     UTILITIES
-  ══════════════════════════════════════════════════════════ */
-  function cap(str) {
-    return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+  async function saveProfile() {
+    if (!analysisResult) return;
+    if (btnSave) {
+      btnSave.disabled = true;
+      btnSave.textContent = 'Menyimpan...';
+    }
+
+    try {
+      const resp = await fetch(window.__SA_ROUTES__.save, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        body: JSON.stringify({
+          skin_tone_level: analysisResult.skin_tone_level,
+          undertone: analysisResult.undertone,
+          hex_sample: analysisResult.hex,
+        })
+      });
+      const data = await resp.json();
+      
+      if (data.success) {
+        if (savePrompt) savePrompt.style.display = 'none';
+        if (panelSaveSuccess) panelSaveSuccess.style.display = 'block';
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Gagal menyimpan profil.');
+    } finally {
+      if (btnSave) {
+        btnSave.disabled = false;
+        btnSave.textContent = 'Simpan';
+      }
+    }
   }
 
-  /* ══════════════════════════════════════════════════════════
-     EVENT LISTENERS
-  ══════════════════════════════════════════════════════════ */
+  // --- EVENTS ---
   btnStart?.addEventListener('click', startCamera);
-  btnStop?.addEventListener('click',  stopCamera);
-  btnFlip?.addEventListener('click',  flipCamera);
-
+  btnStop?.addEventListener('click', stopCamera);
+  btnFlip?.addEventListener('click', () => {
+    facingMode = facingMode === 'user' ? 'environment' : 'user';
+    if (stream) startCamera();
+  });
+  
   btnAnalyze?.addEventListener('click', runAnalysis);
-
+  
   btnRetake?.addEventListener('click', () => {
-    panelResult?.style.setProperty('display', 'none');
-    panelWaiting?.style.setProperty('display', 'block');
-    analysisResult = null;
-    // Biarkan kamera dan MediaPipe tetap jalan
+    currentPhase = 'DETECTING';
+    activeARShade = null;
+    if (cameraArea) cameraArea.style.setProperty('--shade', '#e8ded7'); // reset outer bg
+
+    if (panelResult) panelResult.style.display = 'none';
+    if (panelWaiting) panelWaiting.style.display = 'block';
+    
+    // Stabilizer reset
+    stableFrameCount = 0;
   });
 
   btnSave?.addEventListener('click', saveProfile);
 
-  // Cleanup saat tab ditutup
-  window.addEventListener('beforeunload', () => {
-    stopStreamTracks();
-    FaceDetectorModule.destroy();
-  });
+  window.addEventListener('beforeunload', stopCamera);
 
 })();
