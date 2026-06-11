@@ -1,0 +1,425 @@
+/* =============================
+   BASE / RESET LIGHT
+============================= */
+.faceshop-body{
+  margin:0;
+  background:#f7efe9; /* satu warna untuk seluruh halaman */
+  font-family:'Poppins', sans-serif;
+  color:#2f2f2f;
+}
+
+/* =============================
+   PAGE
+============================= */
+.checkout-page{
+  padding: 46px 70px 70px;
+}
+
+.checkout-head{
+  margin-bottom: 18px;
+}
+
+.checkout-title{
+  font-size: 54px;
+  font-weight: 800;
+  text-transform: lowercase;
+  margin: 10px 0 6px;
+  letter-spacing: -0.5px;
+}
+.checkout-title span{
+  color:#d66a86;
+}
+
+.checkout-subtitle{
+  margin: 0 0 10px;
+  opacity:.75;
+  font-size: 14px;
+}
+
+/* =============================
+   LAYOUT
+============================= */
+.checkout-wrapper{
+  display:grid;
+  grid-template-columns: 1.55fr .85fr;
+  gap: 28px;
+  align-items:start;
+}
+
+/* =============================
+   CARDS
+============================= */
+.checkout-card{
+  background:#ffffff;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.06);
+}
+
+.summary-card{
+  background:#ffffff;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.08);
+  position: sticky;
+  top: 18px;
+}
+
+.summary-card h3{
+  font-size: 18px;
+  font-weight: 700;
+  color:#7d1030;
+  margin: 0 0 14px;
+}
+
+/* =============================
+   SECTION BOX
+============================= */
+.section-box{
+  border: 1px solid rgba(125,16,48,.12);
+  background: rgba(255,255,255,.6);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.section-title{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin-bottom: 10px;
+}
+.section-title h3{
+  margin:0;
+  font-size: 16px;
+  font-weight: 700;
+  color:#7d1030;
+}
+.section-title small{
+  opacity:.6;
+}
+
+.req{ color:#d66a86; font-weight:700; }
+
+/* =============================
+   FORM
+============================= */
+.field{ margin-bottom: 12px; }
+
+.field label{
+       
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color:#3b3b3b;
+}
+
+.field input,
+.field textarea,
+.field select{
+  width:100%;
+  background:#fff;
+  border:1.5px solid rgba(0,0,0,.12);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  outline:none;
+  transition: border .2s ease, box-shadow .2s ease;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+  border-color: rgba(125,16,48,.45);
+  box-shadow: 0 0 0 4px rgba(125,16,48,.08);
+}
+
+.field textarea{ resize:none; }
+
+.hint{
+  margin: 8px 0 0;
+  font-size: 12px;
+  opacity:.75;
+  line-height: 1.35;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* =============================
+   PICKUP NOTE
+============================= */
+.pickup-note{
+  display:flex;
+  gap: 10px;
+  align-items:flex-start;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px dashed rgba(125,16,48,.25);
+  background: rgba(214,106,134,.07);
+}
+
+.pickup-badge{
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 20px;
+  border-radius: 999px;
+  background: #7d1030;
+  color:#fff;
+}
+
+/* =============================
+   TRANSFER GRID
+============================= */
+.transfer-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.upload-box{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  background:#fff;
+  border:1.5px dashed rgba(0,0,0,.22);
+  border-radius: 14px;
+  padding: 14px;
+  cursor:pointer;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+.upload-box:hover{
+  transform: translateY(-1px);
+  border-color: rgba(125,16,48,.35);
+  background: rgba(214,106,134,.06);
+}
+
+.upload-box input{ display:none; }
+
+.upload-icon{
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#7d1030;
+  color:#fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.upload-text{
+  display:flex;
+  flex-direction:column;
+  line-height: 1.15;
+}
+.upload-text b{
+  color:#7d1030;
+  font-size: 13.5px;
+}
+.upload-text small{
+  opacity:.75;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* transfer destination */
+.transfer-dest{
+  border-radius: 14px;
+  border:1.5px solid rgba(0,0,0,.10);
+  background:#fff;
+  padding: 14px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap: 10px;
+}
+
+.dest-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.dest-label{
+  font-size: 12px;
+  opacity:.7;
+  margin-bottom: 4px;
+}
+.dest-name{
+  font-weight: 800;
+  color:#7d1030;
+  line-height: 1.1;
+}
+.dest-sub{
+  font-size: 12px;
+  opacity:.7;
+  margin-top: 4px;
+}
+.dest-number{
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: .3px;
+  text-align:right;
+}
+
+.btn-copy{
+  border:none;
+  width:100%;
+  padding: 11px 12px;
+  border-radius: 999px;
+  cursor:pointer;
+  font-weight: 700;
+  color:#7d1030;
+  background: rgba(214,106,134,.20);
+  transition: transform .15s ease, background .15s ease;
+}
+.btn-copy:hover{
+  transform: translateY(-1px);
+  background: rgba(214,106,134,.28);
+}
+
+/* info notes */
+.info-note{
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px dashed rgba(0,0,0,.18);
+  background: rgba(0,0,0,.02);
+}
+
+/* =============================
+   BUTTONS
+============================= */
+.btn-primary{
+  width:100%;
+  background:#7d1030;
+  color:#fff;
+  border:none;
+  padding: 14px 10px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 800;
+  cursor:pointer;
+  box-shadow: 0 10px 18px rgba(125,16,48,.18);
+  transition: transform .15s ease, opacity .15s ease;
+}
+.btn-primary:hover{ transform: translateY(-1px); }
+
+.btn-secondary{
+  width:100%;
+  display:block;
+  text-align:center;
+  margin-top: 10px;
+  background: rgba(214,106,134,.16);
+  color:#7d1030;
+  padding: 14px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration:none;
+}
+
+/* =============================
+   ERROR
+============================= */
+.checkout-error{
+  background:#fff3f3;
+  border:1px solid #ffd0d0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.checkout-error strong{ display:block; margin-bottom: 6px; }
+.checkout-error ul{ margin:0; padding-left:18px; }
+
+/* =============================
+   RECEIPT (STRUK)
+============================= */
+.receipt{
+  border: 1px dashed rgba(0,0,0,.18);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(0,0,0,.02);
+  margin-bottom: 22px;
+  
+}
+
+.receipt-brand{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.receipt-brand b{
+  color:#7d1030;
+  letter-spacing: .4px;
+}
+.receipt-brand small{
+  opacity:.7;
+  font-size: 12px;
+}
+
+.receipt-line{
+  height:1px;
+  background: rgba(0,0,0,.10);
+  margin: 10px 0;
+}
+
+.receipt-row{
+  display:flex;
+  justify-content:space-between;
+  font-size: 13px;
+  margin: 8px 0;
+}
+.receipt-muted{
+  opacity:.85;
+}
+
+.receipt-items{
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+.receipt-item{
+  display:flex;
+  justify-content:space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+.r-left b{ display:block; }
+.r-left small{ display:block; opacity:.7; margin-top: 3px; }
+.r-right{ font-weight: 700; white-space: nowrap; }
+
+.receipt-total{
+  display:flex;
+  justify-content:space-between;
+  font-weight: 900;
+  font-size: 14px;
+}
+.receipt-hint{
+  margin: 10px 0 0;
+  font-size: 12px;
+  opacity:.75;
+  line-height: 1.35;
+}
+
+/* =============================
+   RESPONSIVE
+============================= */
+@media (max-width: 1100px){
+  .checkout-page{ padding: 30px 24px 60px; }
+  .checkout-wrapper{ grid-template-columns: 1fr; }
+  .summary-card{ position: static; }
+  .transfer-grid{ grid-template-columns: 1fr; }
+}

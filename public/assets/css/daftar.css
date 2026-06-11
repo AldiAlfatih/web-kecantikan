@@ -1,0 +1,235 @@
+/* =========================
+   RESET KECIL
+========================= */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.daftar-section {
+  position: relative;
+  min-height: calc(100vh - 70px); /* biar ga kepotong navbar */
+  padding: 56px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* biar tidak “terlalu tengah” saat tinggi */
+}
+
+/* =========================
+   BACKGROUND (lebih “tidak ngezoom”)
+========================= */
+.daftar-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255, 247, 243, 0.88), rgba(255, 247, 243, 0.88)),
+    url("/assets/image/hero-bg.png");
+  background-repeat: no-repeat;
+  background-position: center top;      /* lebih natural daripada center */
+  background-size: 1400px auto;         /* ✅ lebih “stabil” daripada cover */
+  z-index: 0;
+}
+
+/* kalau layar besar banget, boleh cover biar penuh */
+@media (min-width: 1400px) {
+  .daftar-section::before {
+    background-size: cover;
+    background-position: center;
+  }
+}
+
+/* =========================
+   WRAPPER
+========================= */
+.daftar-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 980px;     /* ✅ lebih lebar supaya 2 kolom enak */
+  text-align: center;
+}
+
+.daftar-wrapper h1 {
+  color: #e65b7a;
+  font-size: 30px;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 26px;
+  font-size: 14px;
+}
+
+/* =========================
+   CARD
+========================= */
+.daftar-card {
+  background: rgba(255, 250, 245, 0.92);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 20px;
+  padding: 26px;
+  box-shadow: 0 16px 44px rgba(0,0,0,0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-align: left;
+}
+
+.daftar-card h2 {
+  text-align: center;
+  color: #7a1430;
+  margin-bottom: 18px;
+  font-size: 22px;
+}
+
+.daftar-card h3 {
+  margin: 0 0 12px;
+  color: #7a1430;
+  font-size: 15px;
+}
+
+.daftar-card hr {
+  border: none;
+  border-top: 1px solid rgba(230, 91, 122, .25);
+  margin: 16px 0;
+}
+
+/* =========================
+   FORM GRID (2 kolom)
+========================= */
+.daftar-card form {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* ✅ kiri/kanan */
+  gap: 18px 18px;
+}
+
+/* blok kolom */
+.form-col {
+  background: rgba(255,255,255,.70);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+/* tiap field */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.daftar-card label {
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: rgba(0,0,0,.75);
+}
+
+.daftar-card input,
+.daftar-card select {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.12);
+  font-size: 14px;
+  background: #fff;
+  outline: none;
+  transition: box-shadow .2s ease, border-color .2s ease;
+}
+
+.daftar-card input:focus,
+.daftar-card select:focus {
+  border-color: rgba(230, 91, 122, .65);
+  box-shadow: 0 0 0 5px rgba(230, 91, 122, .14);
+}
+
+/* =========================
+   ACTIONS (button + link) full width di bawah
+========================= */
+.form-actions {
+  grid-column: 1 / -1; /* ✅ span 2 kolom */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.btn-daftar {
+  background: linear-gradient(to right, #f06b83, #e65b7a);
+  border: none;
+  color: #fff;
+  padding: 13px 14px;
+  border-radius: 999px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 14px 30px rgba(230, 91, 122, .22);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.btn-daftar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px rgba(230, 91, 122, .28);
+}
+
+.login-text {
+  font-size: 14px;
+  text-align: center;
+}
+
+.login-text a {
+  color: #e65b7a;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* ALERT SUCCESS & ERROR */
+.alert-success{
+  background: rgba(34, 197, 94, .12);
+  border: 1px solid rgba(34, 197, 94, .35);
+  color: #166534;
+  padding: 12px 14px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.alert-error{
+  background: rgba(239, 68, 68, .10);
+  border: 1px solid rgba(239, 68, 68, .28);
+  color: #7f1d1d;
+  padding: 12px 14px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.alert-error ul{
+  margin-top: 8px;
+  padding-left: 18px;
+}
+
+.alert-error li{
+  margin-bottom: 4px;
+}
+
+/* =========================
+   RESPONSIVE (HP jadi 1 kolom)
+========================= */
+@media (max-width: 860px) {
+  .daftar-wrapper {
+    max-width: 520px;
+  }
+
+  .daftar-card form {
+    grid-template-columns: 1fr; /* ✅ jadi memanjang ke bawah */
+  }
+
+  .form-actions {
+    grid-column: auto;
+  }
+}

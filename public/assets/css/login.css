@@ -1,0 +1,138 @@
+/* LOGIN SECTION */
+.login-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+/* BACKGROUND IMAGE LEMBUT */
+.login-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255, 247, 243, 0.85), rgba(255, 247, 243, 0.85)),
+    url("/assets/image/hero-bg.png");
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+.login-wrapper {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-wrapper h1 {
+  color: #e65b7a;
+  font-size: 30px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+/* CARD */
+.login-card {
+  background: #fffaf5;
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.login-card h2 {
+  color: #7a1430;
+  margin-bottom: 20px;
+}
+
+/* FORM */
+.login-card form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.login-card label {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.login-card input {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 18px;
+  font-size: 14px;
+}
+
+.login-card input:focus {
+  outline: none;
+  border-color: #e65b7a;
+}
+
+/* BUTTON */
+.btn-login-main {
+  background: linear-gradient(to right, #f06b83, #e65b7a);
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 20px;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.btn-admin-link{
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+
+  padding: 12px;
+  border-radius: 20px;
+
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+
+  background: #fff;
+  border: 1.5px solid rgba(230,91,122,.45);
+  color: #e65b7a;
+
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.btn-admin-link:hover{
+  transform: translateY(-1px);
+  background: rgba(230,91,122,.06);
+  box-shadow: 0 10px 22px rgba(0,0,0,.08);
+}
+/* REGISTER */
+.register-text {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.register-text a {
+  color: #e65b7a;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* FIX: hilangkan area kosong sebelum footer */
+.login-section{
+  margin: 0 !important;
+  padding-bottom: 0 !important;  /* ini yang sering bikin blok kosong */
+}
+
+/* kalau ada elemen setelah login-section (misal spacer) */
+.login-section + *{
+  margin-top: 0 !important;
+}

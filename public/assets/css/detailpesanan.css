@@ -1,0 +1,226 @@
+/* BASE */
+.faceshop-body{
+  margin:0;
+  background:#f7efe9;
+  font-family:'Poppins', sans-serif;
+  color:#2f2f2f;
+}
+
+.order-page{
+  padding: 40px 70px 70px;
+}
+
+.order-head{
+  margin: 10px auto 18px;
+  max-width: 980px;
+}
+
+.order-title{
+  font-size: 44px;
+  margin: 0 0 8px;
+  letter-spacing: -0.6px;
+}
+.order-title span{ color:#d66a86; }
+
+.order-subtitle{
+  margin: 0;
+  opacity:.75;
+  font-size: 14px;
+}
+
+.order-wrap{
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.order-card{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 12px 24px rgba(0,0,0,.08);
+}
+
+/* RECEIPT */
+.receipt{
+  border: 1px dashed rgba(0,0,0,.18);
+  border-radius: 16px;
+  padding: 16px;
+  background: rgba(0,0,0,.02);
+}
+
+.receipt-brand{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.receipt-brand b{
+  color:#7d1030;
+  letter-spacing: .4px;
+  font-size: 18px;
+}
+.receipt-brand small{
+  opacity:.7;
+  font-size: 12px;
+}
+
+.receipt-line{
+  height:1px;
+  background: rgba(0,0,0,.10);
+  margin: 12px 0;
+}
+
+.receipt-row{
+  display:flex;
+  justify-content:space-between;
+  gap: 12px;
+  font-size: 13.5px;
+  margin: 8px 0;
+}
+.receipt-muted{ opacity:.75; }
+
+.receipt-items{
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+
+.receipt-item{
+  display:flex;
+  justify-content:space-between;
+  gap: 12px;
+  font-size: 13.5px;
+  align-items:flex-start;
+}
+
+.r-left b{ display:block; }
+.r-left small{ display:block; opacity:.78; margin-top: 3px; line-height: 1.35; }
+.r-left small.muted{ opacity:.65; }
+
+.r-right{
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.receipt-total{
+  display:flex;
+  justify-content:space-between;
+  font-weight: 900;
+  font-size: 15px;
+  margin-top: 10px;
+}
+
+.receipt-hint{
+  margin: 10px 0 0;
+  font-size: 12px;
+  opacity:.75;
+  line-height: 1.4;
+}
+
+/* STATUS PILL - SESUAI ENUM DB */
+.status-pill{
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+/* Biru (menunggu) */
+.status-menunggu_verifikasi{
+  background: #e0ecff;
+  color:#2563eb;
+}
+
+/* Biru tua (diproses) */
+.status-diproses{
+  background:#e7f1ff;
+  color:#1b4b91;
+}
+
+/* Ungu (dikirim) */
+.status-dikirim{
+  background:#f3e8ff;
+  color:#7c3aed;
+}
+
+/* Hijau (selesai) */
+.status-selesai{
+  background:#dcfce7;
+  color:#16a34a;
+}
+
+/* Merah (dibatalkan) */
+.status-dibatalkan{
+  background:#ffe8e8;
+  color:#b3261e;
+}
+
+/* INFO BOXES */
+.info-box{
+  margin-top: 14px;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius: 16px;
+  padding: 14px 16px;
+  background:#fff;
+}
+
+.info-box h3{
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 800;
+  color:#7d1030;
+}
+
+.info-row{
+  display:flex;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(0,0,0,.06);
+  font-size: 13.5px;
+}
+.info-row:first-of-type{ border-top: none; }
+.info-row span{ opacity:.75; }
+.info-row b{ font-weight: 800; }
+
+/* BUTTONS */
+.order-actions{
+  margin-top: 16px;
+  display:flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-primary{
+  background:#7d1030;
+  color:#fff;
+  text-decoration:none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-weight: 800;
+  box-shadow: 0 10px 18px rgba(125,16,48,.18);
+}
+
+.btn-secondary{
+  background: rgba(214,106,134,.18);
+  color:#7d1030;
+  text-decoration:none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px){
+  .order-page{ padding: 28px 18px 60px; }
+  .order-title{ font-size: 34px; }
+  .receipt-item{ flex-direction: column; }
+  .r-right{ align-self: flex-end; }
+  .order-actions{ flex-direction: column; }
+}
