@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/tryon.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/navbar.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/skin_analysis.css') }}">
 </head>
 
 <body class="faceshop-body">
@@ -41,20 +42,25 @@
       <div class="camera-stage">
         <div class="camera-frame">
 
-          {{-- AREA LUAR OVAL (WARNA SHADE) --}}
-          <div class="camera-area" id="cameraArea" style="--shade: {{ $activeShade->hex_color }};">
+          {{-- AREA LUAR (WARNA SHADE) --}}
+          <div class="camera-area" id="cameraArea" style="--shade: {{ $activeShade->hex_color }}; position: relative; overflow: hidden;">
 
-            {{-- OVAL CAMERA --}}
-            <div class="camera-oval">
-              <video id="cameraVideo" autoplay playsinline muted></video>
+            <video id="saVideo" autoplay playsinline muted></video>
+            
+            <canvas id="saCanvas"></canvas>
 
-              <div class="camera-empty" id="cameraEmpty">
-                <div class="empty-ico">📷</div>
-                <div class="empty-text">
-                  <b>Kamera belum aktif</b>
-                  <small>Tekan tombol di bawah untuk mulai.</small>
-                </div>
+            <div class="camera-empty" id="cameraEmpty" style="position: absolute; z-index: 1;">
+              <div class="empty-ico">📷</div>
+              <div class="empty-text">
+                <b>Kamera belum aktif</b>
+                <small>Tekan tombol di bawah untuk mulai.</small>
               </div>
+            </div>
+            
+            {{-- Status overlay untuk loading AI --}}
+            <div class="sa-status-overlay" id="saStatusOverlay">
+              <span class="sa-spinner"></span>
+              <span id="saStatusText">Memulai kamera...</span>
             </div>
 
           </div>
@@ -182,6 +188,8 @@
   };
 </script>
 
+<script src="{{ asset('assets/js/face_detector.js') }}"></script>
+<script src="{{ asset('assets/js/ar_canvas.js') }}"></script>
 <script src="{{ asset('assets/js/tryon.js') }}"></script>
 </body>
 </html>

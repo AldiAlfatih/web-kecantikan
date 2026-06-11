@@ -89,13 +89,10 @@ window.ARCanvasModule = (function () {
     const T = computeTransform(canvasEl, videoEl);
 
     // Filter feathering & opacity
-    // Foundation harus membaur (soft-light atau multiply)
     ctx.save();
     
-    // Feather edge menggunakan filter blur
-    ctx.filter = 'blur(8px)';
-    ctx.globalAlpha = 0.55; // Opacity foundation 
-    ctx.globalCompositeOperation = 'multiply'; // Blending color
+    // Blur yang lebih kecil agar tidak menyebar ke mata/bibir dan tidak terlihat seperti hantu
+    ctx.filter = 'blur(4px)';
 
     ctx.beginPath();
     
@@ -111,7 +108,16 @@ window.ARCanvasModule = (function () {
 
     ctx.fillStyle = shadeHex;
     
-    // Fill rule evenodd: Jika shape di dalam shape, maka ia menjadi transparan (lubang)
+    // --- LAYER 1: TINT & UNDERTONE ---
+    // Opacity diturunkan drastis agar tidak menutupi wajah asli
+    ctx.globalCompositeOperation = 'soft-light';
+    ctx.globalAlpha = 0.35;
+    ctx.fill('evenodd');
+    
+    // --- LAYER 2: COVERAGE / FOUNDATION ---
+    // Coverage sangat tipis
+    ctx.globalCompositeOperation = 'normal';
+    ctx.globalAlpha = 0.05;
     ctx.fill('evenodd');
     
     ctx.restore();

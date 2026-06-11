@@ -263,7 +263,7 @@
     }
 
     rekomList.innerHTML = items.map((item, index) => `
-      <div class="sa-rekom-item" data-hex="${item.hex_color}" style="${index === 0 ? 'border-color:#e65b7a; background:rgba(230,91,122,0.05);' : ''}">
+      <div class="sa-rekom-item" data-hex="${item.hex_color}">
         <div class="sa-rekom-shade-dot" style="background:${item.hex_color};"></div>
         <div class="sa-rekom-item-info">
           <span class="sa-rekom-item-brand">${item.product.brand ?? ''}</span>
@@ -274,8 +274,8 @@
       </div>
     `).join('');
 
-    // Jadikan item pertama sebagai AR default
-    activeARShade = items[0].hex_color;
+    // Default AR tidak aktif sampai user klik produk
+    activeARShade = null;
 
     // Klik untuk ganti AR shade
     rekomList.querySelectorAll('.sa-rekom-item').forEach(el => {

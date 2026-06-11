@@ -47,29 +47,26 @@
       <div class="camera-stage">
         <div class="camera-frame">
 
-          {{-- AREA LUAR OVAL (Bisa diisi warna skin tone setelah deteksi) --}}
-          <div class="camera-area" id="saCameraArea" style="--shade: #e8ded7;">
+          {{-- AREA LUAR (Bisa diisi warna skin tone setelah deteksi) --}}
+          <div class="camera-area" id="saCameraArea" style="--shade: #e8ded7; position: relative; overflow: hidden;">
             
-            {{-- OVAL CAMERA --}}
-            <div class="camera-oval">
-              <video id="saVideo" autoplay playsinline muted></video>
-              
-              {{-- AR Canvas --}}
-              <canvas id="saCanvas"></canvas>
+            <video id="saVideo" autoplay playsinline muted></video>
+            
+            {{-- AR Canvas --}}
+            <canvas id="saCanvas"></canvas>
 
-              <div class="camera-empty" id="saCameraEmpty">
-                <div class="empty-text">
-                  <b style="font-size: 24px; opacity: 0.5;">📷</b>
-                  <b style="margin-top: 8px;">Kamera belum aktif</b>
-                  <small>Tekan tombol di bawah untuk mulai.</small>
-                </div>
+            <div class="camera-empty" id="saCameraEmpty" style="position: absolute; z-index: 1;">
+              <div class="empty-text">
+                <b style="font-size: 24px; opacity: 0.5;">📷</b>
+                <b style="margin-top: 8px; display: block;">Kamera belum aktif</b>
+                <small style="display: block;">Tekan tombol di bawah untuk mulai.</small>
               </div>
-              
-              {{-- Status overlay untuk loading AI --}}
-              <div class="sa-status-overlay" id="saStatusOverlay">
-                <span class="sa-spinner"></span>
-                <span id="saStatusText">Memulai kamera...</span>
-              </div>
+            </div>
+            
+            {{-- Status overlay untuk loading AI --}}
+            <div class="sa-status-overlay" id="saStatusOverlay">
+              <span class="sa-spinner"></span>
+              <span id="saStatusText">Memulai kamera...</span>
             </div>
 
           </div>
