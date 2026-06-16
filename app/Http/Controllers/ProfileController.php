@@ -21,19 +21,37 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'name'            => 'required|string|max:100',
-            'phone'           => 'required|string|max:30',
-            'address'         => 'required|string|max:500',
-            'skin_type'       => 'required|in:normal,berminyak,kering,kombinasi,sensitif',
-            'skin_problem'    => 'nullable|array',
-            'skin_tone_level' => 'required|integer|min:1|max:6',
-            'vein_color'      => 'nullable|in:blue_purple,green_olive,mixed',
+            'name'           => 'required|string|max:100',
+            'phone'          => 'required|string|max:30',
+            // Alamat terstruktur (Shopee-style)
+            'province'       => 'nullable|string|max:100',
+            'city'           => 'nullable|string|max:100',
+            'district'       => 'nullable|string|max:100',
+            'village'        => 'nullable|string|max:100',
+            'postal_code'    => 'nullable|string|max:10',
+            'address_detail' => 'nullable|string|max:300',
+            // Profil kulit
+            'skin_type'      => 'required|in:normal,berminyak,kering,kombinasi,sensitif',
+            'skin_problem'   => 'nullable|array',
+            'skin_tone_level'=> 'required|integer|min:1|max:6',
+            'vein_color'     => 'nullable|in:blue_purple,green_olive,mixed',
         ]);
+
+        // Gabungkan alamat terstruktur menjadi satu string lengkap
+        $addressParts = array_filter([
+            $validated['address_detail'] ?? null,
+            $validated['village'] ? 'Kel. ' . $validated['village'] : null,
+            $validated['district'] ? 'Kec. ' . $validated['district'] : null,
+            $validated['city'] ?? null,
+            $validated['province'] ?? null,
+            $validated['postal_code'] ?? null,
+        ]);
+        $fullAddress = implode(', ', $addressParts) ?: null;
 
         $user->update([
             'name'    => $validated['name'],
             'phone'   => $validated['phone'],
-            'address' => $validated['address'],
+            'address' => $fullAddress,
         ]);
 
         $skinProblemString = isset($validated['skin_problem'])
@@ -54,8 +72,6 @@ class ProfileController extends Controller
             [
                 'skin_type'    => strtolower(trim($validated['skin_type'])),
                 'skin_problem' => $skinProblemString,
-
-                // sementara tetap diisi agar kolom wajib tidak error
                 'tone'         => 'fair',
                 'undertone'    => $undertone ?? 'neutral',
                 'vein_color'   => $veinColor,

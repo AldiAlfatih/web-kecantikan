@@ -79,7 +79,14 @@ class CheckoutController extends Controller
             'delivery_method' => 'required|in:courier,pickup',
             'method'          => 'required|in:transfer,cod,store',
 
+            // Alamat terstruktur
+            'province'        => 'nullable|string|max:100',
+            'city'            => 'nullable|string|max:100',
+            'district'        => 'nullable|string|max:100',
+            'village'         => 'nullable|string|max:100',
+            'postal_code'     => 'nullable|string|max:10',
             'address'         => 'nullable|string|max:500',
+
             'bank'            => 'nullable|string|max:120',
             'payment_proof'   => 'nullable|image|max:2048',
         ], [
@@ -87,9 +94,16 @@ class CheckoutController extends Controller
             'payment_proof.max'   => 'Ukuran gambar maksimal 2MB.',
         ]);
 
-        // validasi tambahan sesuai pilihan
-        if ($request->delivery_method === 'courier' && empty($request->address)) {
-            return back()->withErrors(['address' => 'Alamat wajib diisi jika memilih Diantar Kurir.'])->withInput();
+        // Validasi tambahan sesuai pilihan
+        if ($request->delivery_method === 'courier') {
+            $missing = collect(['province','city','district','village','postal_code','address'])
+                ->filter(fn($k) => empty($request->$k))
+                ->count();
+            if ($missing > 0) {
+                return back()
+                    ->withErrors(['address' => 'Mohon lengkapi seluruh kolom alamat pengiriman.'])
+                    ->withInput();
+            }
         }
 
         if ($request->method === 'transfer') {
@@ -103,6 +117,20 @@ class CheckoutController extends Controller
 
         if ($request->method === 'store' && $request->delivery_method !== 'pickup') {
             return back()->withErrors(['method' => 'Metode "Bayar di Toko" hanya tersedia untuk Pick Up.'])->withInput();
+        }
+
+        // Gabungkan alamat terstruktur menjadi satu string
+        $fullAddress = null;
+        if ($request->delivery_method === 'courier') {
+            $parts = array_filter([
+                $request->address,
+                $request->village ? 'Kel. ' . $request->village : null,
+                $request->district ? 'Kec. ' . $request->district : null,
+                $request->city,
+                $request->province,
+                $request->postal_code,
+            ]);
+            $fullAddress = implode(', ', $parts) ?: null;
         }
 
         $cart = session()->get('cart', []);
@@ -129,7 +157,7 @@ class CheckoutController extends Controller
                 'receiver_email'   => $request->email,
                 'receiver_phone'   => $request->phone,
                 'delivery_method'  => $request->delivery_method,
-                'shipping_address' => $request->delivery_method === 'courier' ? $request->address : null,
+                'shipping_address' => $request->delivery_method === 'courier' ? $fullAddress : null,
                 'shipping_note'    => null,
             ]);
 

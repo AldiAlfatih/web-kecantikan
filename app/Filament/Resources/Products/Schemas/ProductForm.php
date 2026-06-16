@@ -9,7 +9,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Symfony\Component\Yaml\Inline;
 
 class ProductForm
 {
@@ -29,10 +28,34 @@ class ProductForm
                         ->required()
                         ->maxLength(255),
 
-                    TextInput::make('category')
+                    Select::make('category')
                         ->label('Kategori')
                         ->required()
-                        ->maxLength(255),
+                        ->searchable()
+                        ->options([
+                            'foundation'   => 'Foundation',
+                            'concealer'    => 'Concealer',
+                            'blush'        => 'Blush On',
+                            'contour'      => 'Contour & Highlight',
+                            'eyeshadow'    => 'Eyeshadow',
+                            'eyeliner'     => 'Eyeliner',
+                            'mascara'      => 'Maskara',
+                            'lipstick'     => 'Lipstik',
+                            'lipgloss'     => 'Lip Gloss',
+                            'liptint'      => 'Lip Tint',
+                            'primer'       => 'Primer',
+                            'settingspray' => 'Setting Spray',
+                            'powder'       => 'Bedak (Powder)',
+                            'bronzer'      => 'Bronzer',
+                            'skincare'     => 'Skincare',
+                            'serum'        => 'Serum',
+                            'moisturizer'  => 'Moisturizer',
+                            'sunscreen'    => 'Sunscreen',
+                            'toner'        => 'Toner',
+                            'cleanser'     => 'Pembersih Wajah',
+                            'mask'         => 'Masker Wajah',
+                            'other'        => 'Lainnya',
+                        ]),
 
                     TextInput::make('price')
                         ->label('Harga')
