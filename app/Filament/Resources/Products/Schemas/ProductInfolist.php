@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Products\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Product;
 
 class ProductInfolist
 {
@@ -24,7 +26,9 @@ class ProductInfolist
                 ImageEntry::make('image')
                     ->label('Gambar Produk')
                     ->disk('public')
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->url(fn (Product $record) => $record->image ? Storage::disk('public')->url($record->image) : null)
+                    ->openUrlInNewTab(),
                 TextEntry::make('description')
                     ->placeholder('-')
                     ->columnSpanFull(),
