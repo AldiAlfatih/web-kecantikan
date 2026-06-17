@@ -154,17 +154,19 @@
       <div class="addr-grid-2">
         <div class="field">
           <label class="addr-label">Provinsi<span class="req">*</span></label>
-          <select name="province_name" id="p_province" class="custom-sel" disabled>
+          <select id="p_province" class="custom-sel" disabled>
             <option value="">-- Pilih Provinsi --</option>
           </select>
-          <input type="hidden" name="province" id="ph_province">
+          <input type="hidden" name="province_id" id="ph_province_id" value="{{ old('province_id', $user->province_id) }}">
+          <input type="hidden" name="province" id="ph_province" value="{{ old('province', $user->province) }}">
         </div>
         <div class="field">
           <label class="addr-label">Kota / Kabupaten<span class="req">*</span></label>
-          <select name="city_name" id="p_city" class="custom-sel" disabled>
+          <select id="p_city" class="custom-sel" disabled>
             <option value="">-- Pilih Provinsi dulu --</option>
           </select>
-          <input type="hidden" name="city" id="ph_city">
+          <input type="hidden" name="city_id" id="ph_city_id" value="{{ old('city_id', $user->city_id) }}">
+          <input type="hidden" name="city" id="ph_city" value="{{ old('city', $user->city) }}">
         </div>
       </div>
 
@@ -172,22 +174,24 @@
       <div class="addr-grid-3" style="margin-bottom:0.75rem;">
         <div class="field">
           <label class="addr-label">Kecamatan<span class="req">*</span></label>
-          <select name="district_name" id="p_district" class="custom-sel" disabled>
+          <select id="p_district" class="custom-sel" disabled>
             <option value="">-- Pilih Kota dulu --</option>
           </select>
-          <input type="hidden" name="district" id="ph_district">
+          <input type="hidden" name="district_id" id="ph_district_id" value="{{ old('district_id', $user->district_id) }}">
+          <input type="hidden" name="district" id="ph_district" value="{{ old('district', $user->district) }}">
         </div>
         <div class="field">
           <label class="addr-label">Kelurahan / Desa<span class="req">*</span></label>
-          <select name="village_name" id="p_village" class="custom-sel" disabled>
+          <select id="p_village" class="custom-sel" disabled>
             <option value="">-- Pilih Kecamatan dulu --</option>
           </select>
-          <input type="hidden" name="village" id="ph_village">
+          <input type="hidden" name="village_id" id="ph_village_id" value="{{ old('village_id', $user->village_id) }}">
+          <input type="hidden" name="village" id="ph_village" value="{{ old('village', $user->village) }}">
         </div>
         <div class="field">
           <label class="addr-label">Kode Pos</label>
           <input type="text" name="postal_code" id="p_postal"
-            value="{{ old('postal_code') }}"
+            value="{{ old('postal_code', $user->postal_code) }}"
             placeholder="Contoh: 91111" maxlength="10">
         </div>
       </div>
@@ -197,7 +201,7 @@
         <label class="addr-label">Detail Alamat (No. Rumah / Blok / Patokan)</label>
         <textarea name="address_detail" id="p_detail" rows="3"
           placeholder="Contoh: Jl. Budi Utomo No. 12, RT 03/RW 02, dekat masjid Al-Ikhlas"
-        >{{ old('address_detail') }}</textarea>
+        >{{ old('address_detail', $user->address_detail) }}</textarea>
         <p class="addr-hint">Masukkan nama jalan, nomor rumah/blok, dan patokan terdekat.</p>
       </div>
 
@@ -313,21 +317,34 @@ WilayahDropdown.init({
     cityEl:     document.getElementById('p_city'),
     districtEl: document.getElementById('p_district'),
     villageEl:  document.getElementById('p_village'),
+    defaults: {
+        province: '{{ old('province_id', $user->province_id) }}',
+        city:     '{{ old('city_id', $user->city_id) }}',
+        district: '{{ old('district_id', $user->district_id) }}',
+        village:  '{{ old('village_id', $user->village_id) }}',
+    }
 });
 
-// Sync hidden inputs with the textual name
+// Sync hidden inputs with the ID and textual name
 [
-    ['p_province', 'ph_province'],
-    ['p_city',     'ph_city'],
-    ['p_district', 'ph_district'],
-    ['p_village',  'ph_village'],
-].forEach(([selId, hidId]) => {
+    ['p_province', 'ph_province_id', 'ph_province'],
+    ['p_city',     'ph_city_id',     'ph_city'],
+    ['p_district', 'ph_district_id', 'ph_district'],
+    ['p_village',  'ph_village_id',  'ph_village'],
+].forEach(([selId, hidIdId, hidNameId]) => {
     const sel = document.getElementById(selId);
-    const hid = document.getElementById(hidId);
-    if (sel && hid) {
+    const hidId = document.getElementById(hidIdId);
+    const hidName = document.getElementById(hidNameId);
+    if (sel) {
         sel.addEventListener('change', () => {
             const opt = sel.options[sel.selectedIndex];
-            hid.value = opt && opt.value ? opt.textContent.trim() : '';
+            if (opt && opt.value) {
+                if (hidId) hidId.value = opt.value;
+                if (hidName) hidName.value = opt.textContent.trim();
+            } else {
+                if (hidId) hidId.value = '';
+                if (hidName) hidName.value = '';
+            }
         });
     }
 });

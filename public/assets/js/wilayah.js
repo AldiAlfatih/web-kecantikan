@@ -80,6 +80,7 @@ const WilayahDropdown = (() => {
                 provinceEl.appendChild(opt);
             });
             provinceEl.disabled = false;
+            triggerCustom(provinceEl);
 
             // If default province, load cities
             if (defaults.province) {
@@ -297,7 +298,7 @@ const WilayahDropdown = (() => {
 
         // MutationObserver for DOM changes (options added/removed)
         const obs = new MutationObserver(sync);
-        obs.observe(nativeSelect, { childList: true });
+        obs.observe(nativeSelect, { childList: true, attributes: true, attributeFilter: ['disabled'] });
 
         sync();
     }

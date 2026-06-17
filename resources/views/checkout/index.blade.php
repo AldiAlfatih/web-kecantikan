@@ -499,39 +499,43 @@
                             <div class="addr-grid-2">
                                 <div class="co-field">
                                     <label class="addr-label">Provinsi<span class="req">*</span></label>
-                                    <select name="province_name" id="f_province" class="custom-sel" disabled>
+                                    <select id="f_province" class="custom-sel" disabled>
                                         <option value="">-- Pilih Provinsi --</option>
                                     </select>
-                                    <input type="hidden" name="province" id="h_province">
+                                    <input type="hidden" name="province_id" id="h_province_id" value="{{ old('province_id', $user->province_id ?? '') }}">
+                                    <input type="hidden" name="province" id="h_province" value="{{ old('province', $user->province ?? '') }}">
                                 </div>
                                 <div class="co-field">
                                     <label class="addr-label">Kota / Kabupaten<span class="req">*</span></label>
-                                    <select name="city_name" id="f_city" class="custom-sel" disabled>
+                                    <select id="f_city" class="custom-sel" disabled>
                                         <option value="">-- Pilih Provinsi dulu --</option>
                                     </select>
-                                    <input type="hidden" name="city" id="h_city">
+                                    <input type="hidden" name="city_id" id="h_city_id" value="{{ old('city_id', $user->city_id ?? '') }}">
+                                    <input type="hidden" name="city" id="h_city" value="{{ old('city', $user->city ?? '') }}">
                                 </div>
                             </div>
 
                             <div class="addr-grid-3">
                                 <div class="co-field">
                                     <label class="addr-label">Kecamatan<span class="req">*</span></label>
-                                    <select name="district_name" id="f_district" class="custom-sel" disabled>
+                                    <select id="f_district" class="custom-sel" disabled>
                                         <option value="">-- Pilih Kota dulu --</option>
                                     </select>
-                                    <input type="hidden" name="district" id="h_district">
+                                    <input type="hidden" name="district_id" id="h_district_id" value="{{ old('district_id', $user->district_id ?? '') }}">
+                                    <input type="hidden" name="district" id="h_district" value="{{ old('district', $user->district ?? '') }}">
                                 </div>
                                 <div class="co-field">
                                     <label class="addr-label">Kelurahan / Desa<span class="req">*</span></label>
-                                    <select name="village_name" id="f_village" class="custom-sel" disabled>
+                                    <select id="f_village" class="custom-sel" disabled>
                                         <option value="">-- Pilih Kecamatan dulu --</option>
                                     </select>
-                                    <input type="hidden" name="village" id="h_village">
+                                    <input type="hidden" name="village_id" id="h_village_id" value="{{ old('village_id', $user->village_id ?? '') }}">
+                                    <input type="hidden" name="village" id="h_village" value="{{ old('village', $user->village ?? '') }}">
                                 </div>
                                 <div class="co-field">
                                     <label class="addr-label">Kode Pos<span class="req">*</span></label>
                                     <input type="text" name="postal_code" id="f_postal"
-                                        value="{{ old('postal_code') }}"
+                                        value="{{ old('postal_code', $user->postal_code ?? '') }}"
                                         placeholder="Contoh: 90111" maxlength="10">
                                 </div>
                             </div>
@@ -540,7 +544,7 @@
                                 <label class="addr-label">Detail Alamat (No. Rumah / Blok / Patokan)<span class="req">*</span></label>
                                 <textarea name="address" id="f_address" rows="3"
                                     placeholder="Contoh: Jl. Veteran No. 10, RT 02/RW 04, depan Indomaret"
-                                >{{ old('address', $user->address ?? '') }}</textarea>
+                                >{{ old('address', $user->address_detail ?? $user->address ?? '') }}</textarea>
                                 <p class="co-hint">Isi nama jalan, nomor rumah/blok, dan patokan terdekat.</p>
                             </div>
                         </div>
@@ -739,16 +743,34 @@ WilayahDropdown.init({
     cityEl:     document.getElementById('f_city'),
     districtEl: document.getElementById('f_district'),
     villageEl:  document.getElementById('f_village'),
+    defaults: {
+        province: '{{ old('province_id', $user->province_id ?? '') }}',
+        city:     '{{ old('city_id', $user->city_id ?? '') }}',
+        district: '{{ old('district_id', $user->district_id ?? '') }}',
+        village:  '{{ old('village_id', $user->village_id ?? '') }}',
+    }
 });
 
-// Sync hidden inputs (store name, not id)
-['province','city','district','village'].forEach(key => {
-    const sel = document.getElementById('f_' + key);
-    const hid = document.getElementById('h_' + key);
-    if (sel && hid) {
+// Sync hidden inputs (store ID and name)
+[
+    ['f_province', 'h_province_id', 'h_province'],
+    ['f_city',     'h_city_id',     'h_city'],
+    ['f_district', 'h_district_id', 'h_district'],
+    ['f_village',  'h_village_id',  'h_village'],
+].forEach(([selId, hidIdId, hidNameId]) => {
+    const sel = document.getElementById(selId);
+    const hidId = document.getElementById(hidIdId);
+    const hidName = document.getElementById(hidNameId);
+    if (sel) {
         sel.addEventListener('change', () => {
             const opt = sel.options[sel.selectedIndex];
-            hid.value = opt ? opt.textContent.trim() : '';
+            if (opt && opt.value) {
+                if (hidId) hidId.value = opt.value;
+                if (hidName) hidName.value = opt.textContent.trim();
+            } else {
+                if (hidId) hidId.value = '';
+                if (hidName) hidName.value = '';
+            }
         });
     }
 });

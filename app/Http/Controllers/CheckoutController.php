@@ -81,9 +81,13 @@ class CheckoutController extends Controller
 
             // Alamat terstruktur
             'province'        => 'nullable|string|max:100',
+            'province_id'     => 'nullable|string|max:100',
             'city'            => 'nullable|string|max:100',
+            'city_id'         => 'nullable|string|max:100',
             'district'        => 'nullable|string|max:100',
+            'district_id'     => 'nullable|string|max:100',
             'village'         => 'nullable|string|max:100',
+            'village_id'      => 'nullable|string|max:100',
             'postal_code'     => 'nullable|string|max:10',
             'address'         => 'nullable|string|max:500',
 

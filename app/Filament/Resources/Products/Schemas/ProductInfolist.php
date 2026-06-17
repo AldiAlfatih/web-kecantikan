@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Products\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Schemas\Schema;
 
 class ProductInfolist
@@ -20,6 +21,10 @@ class ProductInfolist
                     ->numeric(),
                 TextEntry::make('skin_type')
                     ->badge(),
+                ImageEntry::make('image')
+                    ->label('Gambar Produk')
+                    ->disk('public')
+                    ->columnSpanFull(),
                 TextEntry::make('description')
                     ->placeholder('-')
                     ->columnSpanFull(),

@@ -25,9 +25,13 @@ class ProfileController extends Controller
             'phone'          => 'required|string|max:30',
             // Alamat terstruktur (Shopee-style)
             'province'       => 'nullable|string|max:100',
+            'province_id'    => 'nullable|string|max:100',
             'city'           => 'nullable|string|max:100',
+            'city_id'        => 'nullable|string|max:100',
             'district'       => 'nullable|string|max:100',
+            'district_id'    => 'nullable|string|max:100',
             'village'        => 'nullable|string|max:100',
+            'village_id'     => 'nullable|string|max:100',
             'postal_code'    => 'nullable|string|max:10',
             'address_detail' => 'nullable|string|max:300',
             // Profil kulit
@@ -49,9 +53,19 @@ class ProfileController extends Controller
         $fullAddress = implode(', ', $addressParts) ?: null;
 
         $user->update([
-            'name'    => $validated['name'],
-            'phone'   => $validated['phone'],
-            'address' => $fullAddress,
+            'name'           => $validated['name'],
+            'phone'          => $validated['phone'],
+            'province'       => $validated['province'],
+            'province_id'    => $validated['province_id'],
+            'city'           => $validated['city'],
+            'city_id'        => $validated['city_id'],
+            'district'       => $validated['district'],
+            'district_id'    => $validated['district_id'],
+            'village'        => $validated['village'],
+            'village_id'     => $validated['village_id'],
+            'postal_code'    => $validated['postal_code'],
+            'address_detail' => $validated['address_detail'],
+            'address'        => $fullAddress,
         ]);
 
         $skinProblemString = isset($validated['skin_problem'])
