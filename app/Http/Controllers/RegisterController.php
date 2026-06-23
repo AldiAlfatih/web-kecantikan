@@ -16,7 +16,7 @@ class RegisterController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',
 
-            'address' => 'required|string',
+            // 'address' => 'required|string',
             'phone' => 'required|string',
 
             'skin_type' => 'required',
@@ -33,7 +33,7 @@ class RegisterController extends Controller
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
-                'address' => $validated['address'],
+                // 'address' => $validated['address'],
                 'phone' => $validated['phone'],
                 'role' => 'user',
             ]);

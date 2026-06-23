@@ -66,10 +66,10 @@
             <input type="password" name="password" placeholder="Masukkan password" required>
           </div>
 
-          <div class="form-group">
+          <!-- <div class="form-group">
             <label>Alamat</label>
             <input type="text" name="address" value="{{ old('address') }}" placeholder="Masukkan alamat" required>
-          </div>
+          </div> -->
 
           <div class="form-group">
             <label>Nomor Telepon</label>
