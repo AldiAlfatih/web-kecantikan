@@ -1,43 +1,87 @@
-### 1. Deskripsi Fitur yang Telah Diselesaikan
-*   **Skin Tone AI Analysis (Deteksi Warna Kulit)**
-    *   Sistem membaca warna kulit dominan dari area spesifik wajah (pipi dan dahi) secara *real-time*.
-    *   Data piksel (RGB) dikonversi ke dalam ruang warna HSV untuk mengklasifikasikan *Skin Tone Level* (Light, Medium, Tan, Deep) dan *Undertone* (Warm, Cool, Neutral).
-    *   Setelah deteksi selesai, *frontend* akan melakukan permintaan ke API Backend (`/api/skin/recommend`) untuk mendapatkan daftar rekomendasi produk *foundation* yang relevan.
-*   **AR Virtual Try-On (Simulasi Foundation)**
-    *   Sistem menggunakan elemen HTML5 Canvas untuk melapisi (*overlay*) warna *shade* produk secara langsung ke wajah pengguna.
-    *   **Teknik Blending:** Agar hasil terlihat realistis, proses rendering dibagi menjadi dua *layer*. *Layer* pertama menggunakan mode `soft-light` (untuk menyesuaikan *tint/undertone* tanpa menghilangkan tekstur dan pencahayaan kulit asli), dan *layer* kedua menggunakan mode `normal` dengan *opacity* sangat rendah (untuk efek *coverage* bedak/pigmen).
-    *   **Masking Presisi:** Area mata, alis, dan bibir diisolasi dan tidak akan tertutup warna menggunakan aturan *fill-rule* `evenodd`, serta tepi luar lapisan *foundation* di-*blur* secara halus (4px) agar menyatu dengan garis rahang dan rambut.
+# Dokumentasi Implementasi Fitur: Skin Tone AI & Virtual Try-On
 
-### 2. Arsitektur File dan Modul JavaScript
-Logika utama telah dipisahkan ke dalam beberapa modul spesifik untuk memudahkan proses perbaikan (*maintenance*):
+Dokumen ini memuat detail implementasi penambahan fitur "Skin Tone AI" (Deteksi Warna Kulit berbasis AI) dan "Virtual Try-On" (Simulasi AR Produk) pada project web e-commerce kosmetik. Fitur ini dirancang khusus untuk memfasilitasi pengguna menemukan produk *foundation* yang akurat dengan kulit mereka secara langsung melalui kamera browser.
 
-1.  **`public/assets/js/face_detector.js`** -> Modul *wrapper* untuk menginisialisasi MediaPipe Face Mesh, menangani izin akses kamera, dan melacak 478 koordinat wajah (*landmarks*).
-2.  **`public/assets/js/skin_color_analyzer.js`** -> Modul ini bertugas mengekstrak piksel dari *frame* video, menghitung nilai rata-rata warna, dan menjalankan algoritma klasifikasi HSV untuk menentukan metrik kulit.
-3.  **`public/assets/js/ar_canvas.js`** -> Modul yang khusus menangani proses rendering AR. Berfungsi memetakan koordinat MediaPipe ke dalam *path* poligon (wajah, bibir, mata) dan menggambar *masker foundation* di atas kanvas.
-4.  **`public/assets/js/skin_analysis.js`** -> Bertindak sebagai *orchestrator* untuk halaman "Skin Tone AI". Menghubungkan modul deteksi wajah, pemanggilan API, pembaruan DOM hasil, dan eksekusi AR Canvas.
-5.  **`public/assets/js/tryon.js`** -> *Orchestrator* untuk halaman "Virtual Try-On" spesifik produk (`/produk/.../tryon`). Modul ini telah diperbarui agar menggunakan antarmuka kamera penuh dan mesin AR yang sama persis dengan halaman Skin Tone AI.
+---
 
-Pembaruan pada sisi Tampilan (*View*):
-*   Menu **"Rekomendasi"** pada *Navbar* sekarang difungsikan untuk mengarah langsung ke *route* `skin.analysis`.
-*   File *blade* yang menangani fitur ini terdapat di `resources/views/skin_analysis.blade.php` dan `resources/views/virtual_tryon.blade.php`.
+## 1. Ikhtisar Fitur Utama
 
-### 3. Panduan Pengujian (Testing)
-Untuk memastikan seluruh fungsionalitas berjalan dengan baik, silakan ikuti langkah-langkah pengujian berikut:
+Pembaruan pada sistem ini memperkenalkan dua modul fungsional utama yang saling terintegrasi:
 
-**A. Pengujian Skin Tone AI:**
-1.  Jalankan *local server* (`php artisan serve`).
-2.  Buka aplikasi di *browser* dan pilih menu **Rekomendasi** di *Navbar* (pastikan sudah login untuk memastikan fitur penyimpanan profil berjalan).
-3.  Klik tombol **"Aktifkan Kamera"** dan pastikan indikator *tracking* wajah (titik-titik warna) muncul dengan baik di area wajah.
-4.  Klik **"Analisis Sekarang"** setelah memposisikan wajah dengan stabil.
-5.  Validasi bahwa *sidebar* di sebelah kanan berhasil menampilkan daftar rekomendasi produk yang disesuaikan dengan hasil analisis.
+1. **AI Skin Tone Analyzer**
+   Sistem yang secara *real-time* menangkap warna kulit pengguna melalui kamera *device*, memproses warna piksel dari area spesifik (pipi dan dahi), lalu mengklasifikasikan tipe kulit berdasarkan *Tone* (Light, Medium, Tan, Deep) dan *Undertone* (Cool, Warm, Neutral). Fitur ini berjalan 100% *client-side* (langsung di browser) sehingga sangat aman dari aspek privasi (tidak ada foto yang dikirim atau disimpan ke server).
 
-**B. Pengujian AR Canvas / Virtual Try-On:**
-1.  Pada daftar rekomendasi yang muncul, klik salah satu kartu *shade* produk.
-2.  Perhatikan video kamera; *filter foundation* dengan warna yang dipilih akan langsung diterapkan secara *real-time* pada wajah.
-3.  Gerakkan wajah untuk memastikan pemetaan poligon (*tracking*) tetap akurat dan warna *foundation* tidak menutupi area mata maupun bibir.
-4.  Lakukan pengujian sekunder melalui halaman Detail Produk dengan mengklik tombol **"Try-On"**. Pastikan fungsionalitas AR di halaman tersebut memberikan hasil komposisi dan kestabilan yang identik.
+2. **AR Virtual Try-On**
+   Pengalaman simulasi (*Augmented Reality*) di mana warna *foundation* yang dipilih akan dilapisi (di-*overlay*) secara langsung pada wajah pengguna melalui video kamera. Teknologi pemetaan wajah memastikan warna produk hanya menempel di area kulit, tanpa menutupi mata dan bibir.
 
-### 4. Rekomendasi Improvement Lanjutan
-Untuk iterasi pengembangan selanjutnya, beberapa fokus pembaruan yang disarankan meliputi:
-*   Melakukan *fine-tuning* pada parameter batas HSV (*thresholds*) di modul `skin_color_analyzer.js` guna meningkatkan akurasi deteksi kulit di lingkungan dengan pencahayaan ekstrem (terlalu minim atau kekuningan).
-ada lagi tapi nda tau apa
+---
+
+## 2. Teknologi yang Digunakan
+
+Untuk memastikan performa yang cepat dan realistis, fitur ini dibangun menggunakan kombinasi teknologi berikut:
+
+*   **AI Face Tracking (Pelacakan Wajah): Menggunakan MediaPipe Face Mesh (Google)**
+    MediaPipe Face Mesh adalah librari kecerdasan buatan (*open-source*) buatan Google yang dikhususkan untuk melacak anatomi wajah manusia secara *real-time*. Keunggulan teknologi ini adalah:
+    *   **Tingkat Presisi Tinggi (478 Titik):** Sistem memetakan wajah menjadi *mesh* (jaring) yang terdiri dari 478 titik koordinat. Berkat titik yang padat ini, sistem mampu melacak persis di mana ujung bibir, letak kelopak mata, atau batas garis rahang. Ini yang membuat warna *foundation* hanya menempel di area kulit tanpa meluber ke mata.
+    *   **Berjalan di Browser (Client-Side):** Proses kalkulasi deteksi wajah dieksekusi murni di dalam *browser* perangkat pengguna (HP/Laptop), bukan di server. Artinya, privasi pengguna 100% aman karena rekaman kamera tidak pernah diunggah ke server, sekaligus membuat server aplikasi tetap ringan.
+*   **Skin Tone Analysis: Custom Computer Vision berbasis HSV**
+    Daripada bergantung pada API berbayar, sistem ini menggunakan algoritma deteksi warna buatan sendiri (`skin_color_analyzer.js`) yang menargetkan sampel piksel di area netral wajah. Algoritma ini mengonversi cahaya kamera dari format RGB ke spektrum HSV (Hue, Saturation, Value) karena HSV jauh lebih stabil dan tahan terhadap bayangan atau perubahan cahaya ruangan.
+*   **AR Virtual Try-On: HTML5 Canvas 2D API & Compositing**
+    Sistem merender visual AR murni menggunakan standar Canvas HTML5 tanpa plugin 3D berat (seperti WebGL/Unity). Koordinat dari MediaPipe dikonversi menjadi poligon dinamis. Agar filter terlihat realistis seperti *foundation* asli, diterapkan teknik *blending mode* (`soft-light` untuk *tinting* dan `normal` untuk *coverage*) serta pemotongan lubang (*masking*) di area mata dan bibir (*evenodd fill rule*).
+
+---
+
+## 3. Rincian Pembaruan File & Direktori
+
+Pembaruan ini ditambahkan secara modular ke dalam struktur Laravel agar *codebase* tetap rapi dan mudah dibaca.
+
+### A. Modul Inti (JavaScript)
+Seluruh proses algoritma kecerdasan buatan diletakkan di dalam folder `public/assets/js/`:
+* **`face_detector.js`**: Menangani akses kamera (MediaDevices API) dan inisialisasi modul MediaPipe Face Mesh untuk menghasilkan 478 titik koordinat wajah.
+* **`skin_color_analyzer.js`**: Mengandung logika untuk mengekstrak matriks warna dari *canvas frame*, menghitung nilai rata-rata, lalu menjalankan aturan percabangan (*if-else*) untuk mengelompokkan warna ke dalam standar Tone & Undertone.
+* **`ar_canvas.js`**: Modul AR yang bertugas menggambar filter warna. Mengonversi titik koordinat menjadi poligon wajah, lalu mencampurkan warna menggunakan blending agar menyatu natural dengan kulit.
+* **`skin_analysis.js` & `tryon.js`**: File *orchestrator* utama yang mengatur logika antarmuka (UI) dan menggabungkan semua modul deteksi.
+
+### B. Controller & Views (Laravel)
+* **`resources/views/layout/navbar.blade.php`**: Penambahan fitur *routing*. Menu "Rekomendasi" kini ditautkan secara langsung ke halaman *Skin Tone AI*.
+* **`resources/views/skin_analysis.blade.php`** (Baru): Halaman utama tempat fitur deteksi AI bekerja.
+* **`resources/views/virtual_tryon.blade.php`** (Refactor): Halaman Try-On dari detail produk yang telah ditingkatkan agar terintegrasi dengan mesin AR baru (kamera *full-screen*, *tracking* MediaPipe).
+
+---
+
+## 4. Alur Penggunaan (User Flow)
+
+Berikut adalah panduan untuk menjalankan dan menguji fitur:
+
+### Skenario 1: Analisis Warna Kulit
+1. Jalankan aplikasi dan buka di browser (disarankan Google Chrome).
+2. Login sebagai pengguna, kemudian klik menu **Rekomendasi** di navbar.
+3. Sistem akan meminta izin akses kamera. Klik **"Aktifkan Kamera"**.
+4. Posisikan wajah di depan layar. Indikator *tracking* akan muncul di area wajah jika deteksi berhasil.
+5. Klik tombol **"Analisis Sekarang"** yang muncul di bawah kamera.
+6. Hasil klasifikasi warna kulit (*Tone* & *Undertone*) beserta rekomendasi produk *foundation* yang cocok akan muncul di panel sebelah kanan.
+
+### Skenario 2: Simulasi AR (Virtual Try-On)
+1. Setelah Skenario 1 selesai, klik salah satu kotak *shade* produk di daftar rekomendasi.
+2. Secara *real-time*, filter *foundation* akan langsung terpasang di atas wajah pada video kamera.
+3. Fitur ini juga bisa dites dengan mengklik tombol **"Try-On"** dari dalam halaman Detail Produk. Pengguna bisa mengganti warna *shade* dan melihat perubahan warnanya secara seketika di wajah.
+
+---
+
+## 5. Panduan Modifikasi & Konfigurasi Kode
+
+Jika ada kebutuhan untuk mendemonstrasikan cara mengubah konfigurasi atau membongkar kode di masa depan, berikut adalah panduannya:
+
+**A. Mengubah Aturan Klasifikasi Warna (Tone & Undertone)**
+Buka file `public/assets/js/skin_color_analyzer.js`.
+Cari *function* `classify(r, g, b)`. Sistem klasifikasi ini menggunakan rentang persentase ruang warna (HSV *Thresholds*). Angka pada kondisi `if-else` (contoh: `h < 30`, `s < 0.25`) dapat dimodifikasi jika ingin menyesuaikan akurasi bacaan warna agar lebih pas dengan kondisi pencahayaan tertentu.
+
+**B. Menyesuaikan Ketebalan/Opasitas Filter AR di Wajah**
+Buka file `public/assets/js/ar_canvas.js`.
+Cari *function* `drawARFoundation`. Pada bagian *Layer 1 (Tint & Undertone)* dan *Layer 2 (Coverage/Foundation)*, nilai `ctx.globalAlpha` dapat dinaikkan atau diturunkan. Nilai saat ini (Layer 1: `0.35` dan Layer 2: `0.05`) adalah kalibrasi optimal agar warna menempel tipis tanpa terlihat seperti topeng padat.
+
+**C. Mengubah Algoritma Pengambilan Data (Rekomendasi)**
+Buka `app/Http/Controllers/Api/SkinRecommendationController.php`. Algoritma di dalamnya mencocokkan parameter *Tone* dan *Undertone* pengguna dengan parameter produk di *database*. Kriteria *query filtering* atau jumlah produk yang ditampilkan dapat dimodifikasi di file ini.
+
+---
+*Dokumen teknis implementasi pengembangan fitur e-commerce.*

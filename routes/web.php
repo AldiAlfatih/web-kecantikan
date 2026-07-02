@@ -72,11 +72,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/{order}', [OrderController::class, 'show'])
         ->name('orders.show');
 
-    // checkout harus login
+    // checkout harus login + profil lengkap
     Route::get('/checkout', [CheckoutController::class, 'show'])
+        ->middleware('profile.complete')
         ->name('checkout.show');
 
     Route::post('/checkout', [CheckoutController::class, 'process'])
+        ->middleware('profile.complete')
         ->name('checkout.process');
 
     // cart actions harus login

@@ -13,7 +13,7 @@ function updateSummary() {
 
     const subtotalEl = document.getElementById('subtotal');
     const totalEl = document.getElementById('total');
-
+    
     if (subtotalEl && totalEl) {
         subtotalEl.innerText = formatRupiah(subtotal);
         totalEl.innerText = formatRupiah(subtotal + 10000);

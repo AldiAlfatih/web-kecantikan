@@ -85,10 +85,10 @@
   $profile = $user->profile;
   $pca = $user->pcaProfile;
 
-  $p_skin_type  = strtolower($profile->skin_type ?? '');
-  $p_undertone  = strtolower($pca->undertone ?? '');
-  $p_vein_color = strtolower($pca->vein_color ?? '');
-  $p_tone_level = (int) ($pca->skin_tone_level ?? 0);
+  $p_skin_type  = strtolower($profile?->skin_type ?? '');
+  $p_undertone  = strtolower($pca?->undertone ?? '');
+  $p_vein_color = strtolower($pca?->vein_color ?? '');
+  $p_tone_level = (int) ($pca?->skin_tone_level ?? 0);
 
   $savedAddress = $user->address ?? '';
 @endphp
@@ -104,6 +104,33 @@
       <div class="alert-success">{{ session('success') }}</div>
     @endif
   </div>
+
+  {{-- ✅ ALERT WARNING: Profil belum lengkap (dari middleware checkout) --}}
+  @if(session('warning'))
+    <div style="
+      background: linear-gradient(135deg, #fff7ed, #fffbf5);
+      border: 1.5px solid #f59e0b;
+      border-left: 4px solid #f59e0b;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.2rem;
+      max-width: 1020px;
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-size: 0.9rem;
+      color: #92400e;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
+    ">
+      <span style="font-size: 1.4rem;">⚠️</span>
+      <div>
+        <strong>{{ session('warning') }}</strong>
+        <br><small style="color: #b45309;">Isi minimal <b>Nomor Telepon</b> lalu klik "Simpan Perubahan".</small>
+      </div>
+    </div>
+  @endif
 
   @if ($errors->any())
     <div class="alert-error">
@@ -224,8 +251,9 @@
 
       <div class="grid-2">
         <div class="field">
-          <label>Jenis Kulit <span class="req">*</span></label>
+          <label>Jenis Kulit</label>
           <select name="skin_type" class="custom-sel" id="s_skin_type">
+            <option value="" {{ empty(old('skin_type', $p_skin_type)) ? 'selected' : '' }}>— Pilih jenis kulit —</option>
             @foreach ([
               'normal' => 'Normal',
               'berminyak' => 'Berminyak',
@@ -233,7 +261,7 @@
               'kombinasi' => 'Kombinasi',
               'sensitif' => 'Sensitif',
             ] as $val => $label)
-              <option value="{{ $val }}" {{ old('skin_type', $profile->skin_type ?? '') === $val ? 'selected' : '' }}>
+              <option value="{{ $val }}" {{ old('skin_type', $p_skin_type) === $val ? 'selected' : '' }}>
                 {{ $label }}
               </option>
             @endforeach
@@ -254,8 +282,9 @@
 
       <div class="grid-2">
         <div class="field">
-          <label>Tingkat Kecerahan Kulit <span class="req">*</span></label>
-          <select name="skin_tone_level" id="s_tone" class="custom-sel" required>
+          <label>Tingkat Kecerahan Kulit</label>
+          <select name="skin_tone_level" id="s_tone" class="custom-sel">
+            <option value="" {{ empty($p_tone_level) ? 'selected' : '' }}>— Pilih tingkat kecerahan —</option>
             <option value="1" {{ (string)old('skin_tone_level',$p_tone_level?:'') === '1' ? 'selected':'' }}>Sangat Terang (Fair)</option>
             <option value="2" {{ (string)old('skin_tone_level',$p_tone_level?:'') === '2' ? 'selected':'' }}>Terang (Light)</option>
             <option value="3" {{ (string)old('skin_tone_level',$p_tone_level?:'') === '3' ? 'selected':'' }}>Sedang / Kuning Langsat (Medium)</option>

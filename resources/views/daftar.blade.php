@@ -45,9 +45,6 @@
       <form method="POST" action="{{ route('daftar.store') }}">
         @csrf
 
-        <!-- ========================
-             KOLOM KIRI (DATA AKUN)
-        ======================== -->
         <div class="form-col">
           <h3>Data Akun</h3>
 
@@ -63,81 +60,12 @@
 
           <div class="form-group">
             <label>Password</label>
-            <input type="password" name="password" placeholder="Masukkan password" required>
-          </div>
-
-          <!-- <div class="form-group">
-            <label>Alamat</label>
-            <input type="text" name="address" value="{{ old('address') }}" placeholder="Masukkan alamat" required>
-          </div> -->
-
-          <div class="form-group">
-            <label>Nomor Telepon</label>
-            <input type="text" name="phone" value="{{ old('phone') }}" placeholder="Masukkan nomor telepon" required>
-          </div>
-        </div>
-
-        <!-- ========================
-             KOLOM KANAN (PROFIL KECANTIKAN)
-        ======================== -->
-        <div class="form-col">
-          <h3>Profil Kecantikan</h3>
-
-          <div class="form-group">
-            <label>Jenis Kulit</label>
-            <select name="skin_type" required>
-              <option value="">Pilih jenis kulit</option>
-              <option value="Normal" {{ old('skin_type')=='Normal'?'selected':'' }}>Normal</option>
-              <option value="Berminyak" {{ old('skin_type')=='Berminyak'?'selected':'' }}>Berminyak</option>
-              <option value="Kering" {{ old('skin_type')=='Kering'?'selected':'' }}>Kering</option>
-              <option value="Sensitif" {{ old('skin_type')=='Sensitif'?'selected':'' }}>Sensitif</option>
-              <option value="Kombinasi" {{ old('skin_type')=='Kombinasi'?'selected':'' }}>Kombinasi</option>
-            </select>
+            <input type="password" name="password" placeholder="Masukkan password (min. 8 karakter)" required>
           </div>
 
           <div class="form-group">
-            <label>Warna Kulit</label>
-            <select name="skin_tone_level" required>
-              <option value="">Pilih warna kulit</option>
-              <option value="1" {{ old('skin_tone_level')=='1'?'selected':'' }}>Sangat terang</option>
-              <option value="2" {{ old('skin_tone_level')=='2'?'selected':'' }}>Terang</option>
-              <option value="3" {{ old('skin_tone_level')=='3'?'selected':'' }}>Sedang</option>
-              <option value="4" {{ old('skin_tone_level')=='4'?'selected':'' }}>Sawo matang terang</option>
-              <option value="5" {{ old('skin_tone_level')=='5'?'selected':'' }}>Sawo matang gelap</option>
-              <option value="6" {{ old('skin_tone_level')=='6'?'selected':'' }}>Gelap</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Undertone</label>
-            <select name="undertone" required>
-              <option value="">Pilih undertone</option>
-              <option value="warm" {{ old('undertone')=='warm'?'selected':'' }}>Warm</option>
-              <option value="neutral" {{ old('undertone')=='neutral'?'selected':'' }}>Neutral</option>
-              <option value="cool" {{ old('undertone')=='cool'?'selected':'' }}>Cool</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Masalah Kulit</label>
-            <select name="skin_problem" required>
-              <option value="">Pilih masalah kulit</option>
-              <option value="Jerawat" {{ old('skin_problem')=='Jerawat'?'selected':'' }}>Jerawat</option>
-              <option value="Kusam" {{ old('skin_problem')=='Kusam'?'selected':'' }}>Kusam</option>
-              <option value="Flek" {{ old('skin_problem')=='Flek'?'selected':'' }}>Flek</option>
-              <option value="Pori-pori" {{ old('skin_problem')=='Pori-pori'?'selected':'' }}>Pori-pori besar</option>
-              <option value="Kemerahan" {{ old('skin_problem')=='Kemerahan'?'selected':'' }}>Kemerahan</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Warna Pembuluh Darah</label>
-            <select name="vein_color" required>
-              <option value="">Pilih warna pembuluh darah</option>
-              <option value="blue_purple" {{ old('vein_color')=='blue_purple'?'selected':'' }}>Biru / Ungu</option>
-              <option value="green_olive" {{ old('vein_color')=='green_olive'?'selected':'' }}>Hijau / Olive</option>
-              <option value="mixed" {{ old('vein_color')=='mixed'?'selected':'' }}>Campuran</option>
-            </select>
+            <label>Verifikasi Password</label>
+            <input type="password" name="password_confirmation" placeholder="Ulangi password" required>
           </div>
         </div>
 

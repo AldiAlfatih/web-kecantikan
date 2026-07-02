@@ -34,10 +34,10 @@ class ProfileController extends Controller
             'village_id'     => 'nullable|string|max:100',
             'postal_code'    => 'nullable|string|max:10',
             'address_detail' => 'nullable|string|max:300',
-            // Profil kulit
-            'skin_type'      => 'required|in:normal,berminyak,kering,kombinasi,sensitif',
+            // Profil kulit (opsional untuk user baru)
+            'skin_type'      => 'nullable|in:normal,berminyak,kering,kombinasi,sensitif',
             'skin_problem'   => 'nullable|array',
-            'skin_tone_level'=> 'required|integer|min:1|max:6',
+            'skin_tone_level'=> 'nullable|integer|min:1|max:6',
             'vein_color'     => 'nullable|in:blue_purple,green_olive,mixed',
         ]);
 
@@ -81,30 +81,33 @@ class ProfileController extends Controller
             default       => null,
         };
 
-        UserProfile::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'skin_type'    => strtolower(trim($validated['skin_type'])),
-                'skin_problem' => $skinProblemString,
-                'tone'         => 'fair',
-                'undertone'    => $undertone ?? 'neutral',
-                'vein_color'   => $veinColor,
-            ]
-        );
+        // Hanya simpan profil kulit jika data diisi
+        if (!empty($validated['skin_type']) || !empty($validated['skin_tone_level']) || $veinColor) {
+            UserProfile::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'skin_type'    => !empty($validated['skin_type']) ? strtolower(trim($validated['skin_type'])) : null,
+                    'skin_problem' => $skinProblemString,
+                    'tone'         => 'fair',
+                    'undertone'    => $undertone ?? 'neutral',
+                    'vein_color'   => $veinColor,
+                ]
+            );
 
-        UserPcaProfile::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'skin_tone_level' => (int) $validated['skin_tone_level'],
-                'vein_color'      => $veinColor,
-                'undertone'       => $undertone,
-                'hue'             => $undertone === 'neutral' ? 'neutral' : $undertone,
-                'value'           => null,
-                'chroma'          => null,
-                'season'          => null,
-                'confidence'      => null,
-            ]
-        );
+            UserPcaProfile::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'skin_tone_level' => !empty($validated['skin_tone_level']) ? (int) $validated['skin_tone_level'] : null,
+                    'vein_color'      => $veinColor,
+                    'undertone'       => $undertone,
+                    'hue'             => $undertone === 'neutral' ? 'neutral' : $undertone,
+                    'value'           => null,
+                    'chroma'          => null,
+                    'season'          => null,
+                    'confidence'      => null,
+                ]
+            );
+        }
 
         return back()->with('success', 'Profil berhasil disimpan.');
     }

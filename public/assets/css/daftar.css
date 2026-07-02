@@ -47,7 +47,7 @@ input::-webkit-inner-spin-button {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 980px;     /* ✅ lebih lebar supaya 2 kolom enak */
+  max-width: 520px;     /* ✅ single column, form lebih compact */
   text-align: center;
 }
 
@@ -97,12 +97,12 @@ input::-webkit-inner-spin-button {
 }
 
 /* =========================
-   FORM GRID (2 kolom)
+   FORM GRID (1 kolom)
 ========================= */
 .daftar-card form {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* ✅ kiri/kanan */
-  gap: 18px 18px;
+  grid-template-columns: 1fr; /* ✅ single column */
+  gap: 18px;
 }
 
 /* blok kolom */
