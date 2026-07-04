@@ -22,7 +22,7 @@ class CartController extends Controller
                 $shade = ProductShade::find($item['shade_id']);
             }
 
-            if (!$product) {
+            if (!$product || !$product->is_active) {
                 continue;
             }
 
@@ -71,6 +71,12 @@ class CartController extends Controller
             'shade_id.required' => 'Silakan pilih shade terlebih dahulu.',
             'shade_id.exists'   => 'Shade tidak valid.',
         ]);
+
+        // pastikan produk aktif
+        $product = Product::find($request->product_id);
+        if (!$product || !$product->is_active) {
+            return back()->with('error', 'Produk tidak aktif atau tidak ditemukan.');
+        }
 
         // pastikan shade memang milik product
         $shade = ProductShade::where('id', $request->shade_id)

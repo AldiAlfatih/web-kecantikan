@@ -23,6 +23,7 @@ class HomeController extends Controller
             ->pluck('product_id');
 
         $bestSellers = Product::query()
+            ->where('is_active', true)
             ->whereIn('id', $bestSellerProductIds)
             ->get()
             // urutkan sesuai urutan pluck (biar tampil sesuai ranking)
@@ -68,6 +69,7 @@ class HomeController extends Controller
                 ->values();
 
             $recommendedProducts = Product::query()
+                ->where('is_active', true)
                 ->whereIn('id', $productIds)
                 ->get()
                 ->sortBy(fn ($p) => array_search($p->id, $productIds->toArray()))
@@ -80,6 +82,7 @@ class HomeController extends Controller
         $excludeIds = $recommendedProducts->pluck('id')->toArray();
 
         $otherProducts = Product::query()
+            ->where('is_active', true)
             ->when(count($excludeIds) > 0, fn ($q) => $q->whereNotIn('id', $excludeIds))
             ->latest('id')
             ->limit(6)

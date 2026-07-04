@@ -41,7 +41,9 @@ class RecommendationEngine
         }
 
         // ===== Query ke ProductShade =====
-        $query = ProductShade::query()->with('product');
+        $query = ProductShade::query()
+            ->whereHas('product', fn ($q) => $q->where('is_active', true))
+            ->with('product');
 
         if ($category) {
             $query->whereHas('product', fn ($q) => $q->where('category', $category));

@@ -31,8 +31,8 @@ class CheckoutController extends Controller
             $product = Product::find($item['product_id'] ?? null);
             $shade   = ProductShade::find($item['shade_id'] ?? null);
 
-            // kalau data rusak, skip
-            if (!$product || !$shade) {
+            // kalau data rusak atau produk tidak aktif, skip
+            if (!$product || !$product->is_active || !$shade) {
                 continue;
             }
 
@@ -173,8 +173,8 @@ class CheckoutController extends Controller
                 $qty       = max(1, (int)($item['qty'] ?? 1));
 
                 $product = Product::find($productId);
-                if (!$product) {
-                    throw new \Exception("Produk tidak ditemukan.");
+                if (!$product || !$product->is_active) {
+                    throw new \Exception("Produk tidak ditemukan atau tidak aktif.");
                 }
 
                 // ✅ kunci row shade agar aman dari race condition

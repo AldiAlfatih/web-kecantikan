@@ -26,6 +26,10 @@ class TryOnController extends Controller
 
     public function show(Product $product, ProductShade $shade)
     {
+        if (!$product->is_active) {
+            abort(404);
+        }
+
         // Ambil semua shades milik product (sekali saja)
         $product->load('shades');
 
