@@ -114,9 +114,6 @@ class CheckoutController extends Controller
             if (empty($request->bank)) {
                 return back()->withErrors(['bank' => 'Silakan pilih bank / e-wallet.'])->withInput();
             }
-            if (!$request->hasFile('payment_proof')) {
-                return back()->withErrors(['payment_proof' => 'Bukti transfer wajib diupload jika metode Transfer.'])->withInput();
-            }
         }
 
         if ($request->method === 'store' && $request->delivery_method !== 'pickup') {

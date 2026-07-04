@@ -626,13 +626,7 @@
                                 </div>
                             </div>
 
-                            <div class="co-sub">Upload Bukti Transfer<span class="req">*</span></div>
-                            <label class="upload-box" for="paymentProof">
-                                <input type="file" name="payment_proof" id="paymentProof" accept="image/*">
-                                <div style="font-size:1.8rem">📤</div>
-                                <div class="upload-text"><strong>Klik untuk upload</strong><br>JPG / PNG • maks. 2MB</div>
-                                <img id="previewImg" src="" alt="Preview">
-                            </label>
+
                         </div>
 
                         <div class="info-note info-note-blue" id="sec_cod">
@@ -677,7 +671,6 @@
                             <div class="rv-group-title">Pembayaran</div>
                             <div class="rv-row"><span class="rv-lbl">Metode</span><span class="rv-val" id="rv_pay">—</span></div>
                             <div class="rv-row" id="rv_bank_row"><span class="rv-lbl">Bank/E-Wallet</span><span class="rv-val" id="rv_bank">—</span></div>
-                            <div class="rv-row" id="rv_proof_row"><span class="rv-lbl">Bukti Transfer</span><span class="rv-val" id="rv_proof">—</span></div>
                         </div>
                     </div>
 
@@ -831,9 +824,6 @@ function validateStep2() {
         if (!document.querySelector('input[name="bank"]:checked')) {
             alert('Pilih bank / e-wallet tujuan.'); return false;
         }
-        if (!document.getElementById('paymentProof').files.length) {
-            alert('Upload bukti transfer terlebih dahulu.'); return false;
-        }
     }
     if (method.value === 'store' && !document.getElementById('dlvPickup').checked) {
         alert('"Bayar di Toko" hanya untuk Pick Up.'); return false;
@@ -875,14 +865,10 @@ function buildReview() {
 
     if (payVal === 'transfer') {
         v('rv_bank_row').style.display = '';
-        v('rv_proof_row').style.display = '';
         const bank = document.querySelector('input[name="bank"]:checked');
         v('rv_bank').textContent  = bank ? bank.value.toUpperCase() : '—';
-        const file = document.getElementById('paymentProof').files[0];
-        v('rv_proof').textContent = file ? file.name : '—';
     } else {
         v('rv_bank_row').style.display  = 'none';
-        v('rv_proof_row').style.display = 'none';
     }
 }
 
@@ -935,12 +921,7 @@ function copyRek() {
     if (n && n !== '—') navigator.clipboard.writeText(n).then(() => alert('Disalin: ' + n));
 }
 
-// ── PREVIEW UPLOAD ──
-document.getElementById('paymentProof').addEventListener('change', function() {
-    const img = document.getElementById('previewImg');
-    if (this.files[0]) { img.src = URL.createObjectURL(this.files[0]); img.style.display = 'block'; }
-    else img.style.display = 'none';
-});
+
 </script>
 </body>
 </html>

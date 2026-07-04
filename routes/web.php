@@ -72,6 +72,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/{order}', [OrderController::class, 'show'])
         ->name('orders.show');
 
+    Route::post('/pesanan/{order}/upload-bukti', [OrderController::class, 'uploadProof'])
+        ->name('orders.upload-proof');
+
     // checkout harus login + profil lengkap
     Route::get('/checkout', [CheckoutController::class, 'show'])
         ->middleware('profile.complete')

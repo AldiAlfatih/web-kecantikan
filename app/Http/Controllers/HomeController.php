@@ -16,6 +16,7 @@ class HomeController extends Controller
         // =========================
         // Ambil 3 produk terlaris dari order_items (qty terbanyak)
         $bestSellerProductIds = OrderItem::query()
+            ->whereHas('product', fn ($q) => $q->where('is_active', true))
             ->selectRaw('product_id, SUM(qty) as total_qty')
             ->groupBy('product_id')
             ->orderByDesc('total_qty')
