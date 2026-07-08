@@ -169,7 +169,10 @@ class CheckoutController extends Controller
                 $shadeId   = (int)($item['shade_id'] ?? 0);
                 $qty       = max(1, (int)($item['qty'] ?? 1));
 
-                $product = Product::find($productId);
+                // ✅ kunci row produk agar aman dari race condition
+                $product = Product::where('id', $productId)
+                    ->lockForUpdate()
+                    ->first();
                 if (!$product || !$product->is_active) {
                     throw new \Exception("Produk tidak ditemukan atau tidak aktif.");
                 }
@@ -184,6 +187,16 @@ class CheckoutController extends Controller
                     throw new \Exception("Shade tidak valid untuk produk '{$product->name}'.");
                 }
 
+                // Cek stok produk utama
+                $productStock = (int) ($product->stock ?? 0);
+                if ($productStock <= 0) {
+                    throw new \Exception("Produk '{$product->name}' sedang HABIS.");
+                }
+                if ($qty > $productStock) {
+                    throw new \Exception("Qty melebihi stok produk '{$product->name}'. Stok tersedia: {$productStock}");
+                }
+
+                // Cek stok shade
                 $stock = (int) ($shade->stock ?? 0);
                 if ($stock <= 0) {
                     throw new \Exception("Shade '{$shade->shade_name}' sedang HABIS.");
@@ -203,9 +216,10 @@ class CheckoutController extends Controller
                     'subtotal'         => $subtotal,
                 ]);
 
-                // ✅ paling aman: stok shade dipotong saat checkout (semua metode)
+                // ✅ paling aman: stok shade & produk dipotong saat checkout (semua metode)
                 // kalau transfer ditolak, nanti admin bisa kembalikan stok
                 $shade->decrement('stock', $qty);
+                $product->decrement('stock', $qty);
 
                 $total += $subtotal;
             }

@@ -75,6 +75,7 @@ class OrderResource extends Resource
                             $order->loadMissing(['payment', 'items']);
 
                             $payment = $order->payment;
+                            $oldStatus = $order->status;
 
                             // Kalau tidak punya payment, ya update order saja (kasus jarang)
                             if (!$payment) {
@@ -95,6 +96,11 @@ class OrderResource extends Resource
                                         'verified_at' => null,
                                         'verified_by' => auth()->id(),
                                     ]);
+                                }
+
+                                // Jika status sebelumnya bukan dibatalkan, kembalikan stok
+                                if ($oldStatus !== 'dibatalkan') {
+                                    self::restoreOrderStock($order);
                                 }
                                 return;
                             }
@@ -128,6 +134,11 @@ class OrderResource extends Resource
                                         ->send();
                                     return; // tidak update apa-apa
                                 }
+                            }
+
+                            // Jika diubah dari 'dibatalkan' ke status aktif lainnya (diproses, dll)
+                            if ($oldStatus === 'dibatalkan' && $state !== 'dibatalkan') {
+                                self::reduceOrderStock($order);
                             }
 
                             // Update order sesuai pilihan admin
@@ -172,6 +183,8 @@ class OrderResource extends Resource
 
                                 $order->loadMissing(['payment', 'items']);
                                 $payment = $order->payment;
+                                $oldPaymentStatus = $payment->status;
+                                $oldOrderStatus = $order->status;
 
                                 /**
                                  * A) Jika admin set PAYMENT = REJECTED
@@ -185,62 +198,24 @@ class OrderResource extends Resource
                                     ]);
 
                                     $order->update(['status' => 'dibatalkan']);
+
+                                    // Jika status order sebelumnya bukan dibatalkan, kembalikan stok
+                                    if ($oldOrderStatus !== 'dibatalkan') {
+                                        self::restoreOrderStock($order);
+                                    }
                                     return;
                                 }
 
                                 /**
                                  * B) Jika admin set PAYMENT = VERIFIED
-                                 *    => cek & potong stok (sekali)
-                                 *    => order minimal DIPROSES (atau mau auto dikirim/selesai boleh)
+                                 *    => cek & potong stok jika sebelumnya dinonaktifkan (rejected / dibatalkan)
+                                 *    => order minimal DIPROSES
                                  */
                                 if ($state === 'verified') {
 
-                                    // Jika sudah verified sebelumnya, jangan potong stok lagi
-                                    if ($payment->status !== 'verified') {
-
-                                        // cek stok (prioritas shade)
-                                        foreach ($order->items as $it) {
-                                            $qty = (int) $it->qty;
-
-                                            if (!empty($it->product_shade_id)) {
-                                                $shade = ProductShade::query()
-                                                    ->whereKey($it->product_shade_id)
-                                                    ->lockForUpdate()
-                                                    ->firstOrFail();
-
-                                                if ((int) $shade->stock < $qty) {
-                                                    throw new \Exception("Stok shade '{$shade->shade_name}' tidak cukup.");
-                                                }
-                                            } else {
-                                                $product = Product::query()
-                                                    ->whereKey($it->product_id)
-                                                    ->lockForUpdate()
-                                                    ->firstOrFail();
-
-                                                if ((int) $product->stock < $qty) {
-                                                    throw new \Exception("Stok produk '{$product->name}' tidak cukup.");
-                                                }
-                                            }
-                                        }
-
-                                        // potong stok (sekali)
-                                        foreach ($order->items as $it) {
-                                            $qty = (int) $it->qty;
-
-                                            if (!empty($it->product_shade_id)) {
-                                                ProductShade::query()
-                                                    ->whereKey($it->product_shade_id)
-                                                    ->lockForUpdate()
-                                                    ->firstOrFail()
-                                                    ->decrement('stock', $qty);
-                                            } else {
-                                                Product::query()
-                                                    ->whereKey($it->product_id)
-                                                    ->lockForUpdate()
-                                                    ->firstOrFail()
-                                                    ->decrement('stock', $qty);
-                                            }
-                                        }
+                                    // Jika sebelumnya dibatalkan atau ditolak, potong stok kembali
+                                    if ($oldPaymentStatus === 'rejected' || $oldOrderStatus === 'dibatalkan') {
+                                        self::reduceOrderStock($order);
                                     }
 
                                     $payment->update([
@@ -250,34 +225,25 @@ class OrderResource extends Resource
                                     ]);
 
                                     // Setelah verified, order minimal diproses kalau sebelumnya masih menunggu_verifikasi / dibatalkan
-                                    if (in_array($order->status, ['menunggu_verifikasi'], true)) {
+                                    if (in_array($order->status, ['menunggu_verifikasi', 'dibatalkan'], true)) {
                                         $order->update(['status' => 'diproses']);
                                     }
-
-                                    /**
-                                     * 🔥 Kalau kamu MAU verified otomatis jadi DIKIRIM / SELESAI:
-                                     * contoh:
-                                     * $order->update(['status' => 'dikirim']);
-                                     * atau
-                                     * $order->update(['status' => 'selesai']);
-                                     */
                                     return;
                                 }
 
                                 /**
                                  * C) Selain itu (pending / waiting_verification)
-                                 *    => update payment saja
-                                 *    (opsional) kalau order dibatalkan karena sebelumnya rejected,
-                                 *    kamu mau tetap dibatalkan atau balikin? aku biarkan tetap.
+                                 *    => jika sebelumnya ditolak / dibatalkan, dan sekarang diaktifkan kembali
                                  */
+                                if (($oldPaymentStatus === 'rejected' || $oldOrderStatus === 'dibatalkan') && !in_array($state, ['rejected'], true)) {
+                                    self::reduceOrderStock($order);
+                                }
+
                                 $payment->update([
                                     'status'      => $state,
                                     'verified_at' => null,
                                     'verified_by' => null,
                                 ]);
-
-                                // Jika payment kembali ke waiting/pending dan order kebetulan dibatalkan,
-                                // aku tidak paksa balik (biar admin yang tentukan).
                             });
 
                             Notification::make()
@@ -377,8 +343,6 @@ class OrderResource extends Resource
                         && in_array($record->payment?->status, ['pending', 'waiting_verification'], true)
                     )
                     ->action(function (Order $record) {
-                        // cukup “set payment verified” (logic stok & sinkron sudah aman juga lewat dropdown)
-                        // tapi untuk tombol ini, kita eksekusi versi aman yang lengkap:
                         try {
                             DB::transaction(function () use ($record) {
 
@@ -391,30 +355,11 @@ class OrderResource extends Resource
                                     return;
                                 }
 
-                                // cek stok
-                                foreach ($order->items as $it) {
-                                    $qty = (int) $it->qty;
-
-                                    if (!empty($it->product_shade_id)) {
-                                        $shade = ProductShade::query()->whereKey($it->product_shade_id)->lockForUpdate()->firstOrFail();
-                                        if ((int) $shade->stock < $qty) throw new \Exception("Stok shade '{$shade->shade_name}' tidak cukup.");
-                                    } else {
-                                        $product = Product::query()->whereKey($it->product_id)->lockForUpdate()->firstOrFail();
-                                        if ((int) $product->stock < $qty) throw new \Exception("Stok produk '{$product->name}' tidak cukup.");
-                                    }
-                                }
-
-                                // potong stok
-                                foreach ($order->items as $it) {
-                                    $qty = (int) $it->qty;
-
-                                    if (!empty($it->product_shade_id)) {
-                                        ProductShade::query()->whereKey($it->product_shade_id)->lockForUpdate()->firstOrFail()
-                                            ->decrement('stock', $qty);
-                                    } else {
-                                        Product::query()->whereKey($it->product_id)->lockForUpdate()->firstOrFail()
-                                            ->decrement('stock', $qty);
-                                    }
+                                // Jika sebelumnya ditolak atau dibatalkan, kurangi stok kembali
+                                $oldPaymentStatus = $order->payment->status;
+                                $oldOrderStatus = $order->status;
+                                if ($oldPaymentStatus === 'rejected' || $oldOrderStatus === 'dibatalkan') {
+                                    self::reduceOrderStock($order);
                                 }
 
                                 $order->payment->update([
@@ -423,7 +368,7 @@ class OrderResource extends Resource
                                     'verified_by' => auth()->id(),
                                 ]);
 
-                                if ($order->status === 'menunggu_verifikasi') {
+                                if (in_array($order->status, ['menunggu_verifikasi', 'dibatalkan'], true)) {
                                     $order->update(['status' => 'diproses']);
                                 }
                             });
@@ -458,9 +403,11 @@ class OrderResource extends Resource
                         try {
                             DB::transaction(function () use ($record) {
                                 $order = Order::query()->whereKey($record->id)->lockForUpdate()->firstOrFail();
-                                $order->loadMissing(['payment']);
+                                $order->loadMissing(['payment', 'items']);
 
                                 if (!$order->payment) throw new \Exception('Payment tidak ditemukan.');
+
+                                $oldOrderStatus = $order->status;
 
                                 $order->payment->update([
                                     'status'      => 'rejected',
@@ -469,6 +416,11 @@ class OrderResource extends Resource
                                 ]);
 
                                 $order->update(['status' => 'dibatalkan']);
+
+                                // Kembalikan stok produk & shade
+                                if ($oldOrderStatus !== 'dibatalkan') {
+                                    self::restoreOrderStock($order);
+                                }
                             });
 
                             Notification::make()->title('Pembayaran ditolak')->danger()->send();
@@ -537,6 +489,86 @@ class OrderResource extends Resource
                     }),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    /**
+     * Mengembalikan stok shade dan produk jika order dibatalkan / ditolak.
+     */
+    public static function restoreOrderStock(Order $order): void
+    {
+        foreach ($order->items as $it) {
+            $qty = (int) $it->qty;
+
+            if (!empty($it->product_shade_id)) {
+                $shade = ProductShade::query()
+                    ->whereKey($it->product_shade_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($shade) {
+                    $shade->increment('stock', $qty);
+                }
+            }
+
+            $product = Product::query()
+                ->whereKey($it->product_id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($product) {
+                $product->increment('stock', $qty);
+            }
+        }
+    }
+
+    /**
+     * Memotong stok shade dan produk jika order aktif kembali.
+     */
+    public static function reduceOrderStock(Order $order): void
+    {
+        // 1. Cek kecukupan stok terlebih dahulu
+        foreach ($order->items as $it) {
+            $qty = (int) $it->qty;
+
+            if (!empty($it->product_shade_id)) {
+                $shade = ProductShade::query()
+                    ->whereKey($it->product_shade_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if ((int) $shade->stock < $qty) {
+                    throw new \Exception("Stok shade '{$shade->shade_name}' tidak cukup.");
+                }
+            }
+
+            $product = Product::query()
+                ->whereKey($it->product_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ((int) $product->stock < $qty) {
+                throw new \Exception("Stok produk '{$product->name}' tidak cukup.");
+            }
+        }
+
+        // 2. Lakukan pemotongan stok
+        foreach ($order->items as $it) {
+            $qty = (int) $it->qty;
+
+            if (!empty($it->product_shade_id)) {
+                ProductShade::query()
+                    ->whereKey($it->product_shade_id)
+                    ->lockForUpdate()
+                    ->firstOrFail()
+                    ->decrement('stock', $qty);
+            }
+
+            Product::query()
+                ->whereKey($it->product_id)
+                ->lockForUpdate()
+                ->firstOrFail()
+                ->decrement('stock', $qty);
+        }
     }
 
     public static function getPages(): array
