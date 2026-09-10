@@ -1,61 +1,216 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 💄 FaceShop — E-Commerce Kosmetik & Beauty Platform Berbasis AI & AR
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Platform e-commerce kosmetik modern yang dilengkapi dengan teknologi kecerdasan buatan (**AI Skin Tone Analyzer**) dan Augmented Reality (**AR Virtual Try-On**) untuk membantu pengguna menemukan dan mencoba produk kecantikan (seperti *foundation* & *shade makeup*) yang paling sesuai secara akurat langsung melalui kamera *browser*.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🌟 Fitur Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- 🔍 **AI Skin Tone Analyzer**: Analisis warna kulit (*Tone* & *Undertone*) secara *real-time* via kamera tanpa perlu foto diunggah ke server (*100% Client-Side Privacy*).
+- 🪞 **AR Virtual Try-On**: Simulasi pemakaian shade foundation pada wajah dengan pelacakan kontur 478 titik (MediaPipe Face Mesh) dan perpaduan warna alami (*Soft-Light Blending*).
+- 🎨 **Personal Color Analysis (PCA)**: Rekomendasi produk berbasis tone, undertone, dan warna palet musiman (*Seasonal Color*).
+- 🛍️ **Katalog Produk & Shade Lengkap**: Filter kategori, pencarian produk, varian shade warna dengan visual hex picker.
+- 🛒 **Manajemen Keranjang & Checkout**: Sistem pemesanan, konfirmasi pembayaran, dan upload bukti transfer.
+- 📊 **Admin Dashboard (Filament)**: Manajemen produk, shade warna, pesanan customer, serta visualisasi grafik penjualan interaktif.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 📋 Prasyarat Sistem
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Pastikan perangkat Anda sudah terinstal:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **PHP** >= 8.2 (dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `curl`, `fileinfo`, dan **`intl`** aktif)
+- **Composer** (PHP Dependency Manager)
+- **Node.js** (v18+) & **NPM**
+- **Web Server & Database**: XAMPP / Laragon (MySQL / MariaDB & Apache)
+- **Browser Modern**: Google Chrome, Microsoft Edge, atau Mozilla Firefox (Mendukung izin akses kamera)
 
-## Laravel Sponsors
+> [!IMPORTANT]
+> **Penting untuk Pengguna XAMPP**:
+> Pastikan ekstensi **`intl`** telah aktif di `php.ini`.
+> 1. Buka XAMPP Control Panel ➔ Klik **Config** pada Apache ➔ Pilih **PHP (php.ini)**.
+> 2. Cari `;extension=intl` lalu hilangkan tanda titik koma (`;`) menjadi: `extension=intl`.
+> 3. Simpan file lalu *Restart Apache*.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🚀 Panduan Instalasi & Menjalankan Proyek
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Ikuti langkah-langkah berikut untuk menginstal dan menjalankan aplikasi di komputer lokal:
 
-## Contributing
+### 1. Clone atau Buka Folder Proyek
+Buka terminal/PowerShell pada direktori proyek:
+```bash
+cd c:\xampp\htdocs\web_kecantikan\web-kecantikan
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 2. Install Dependensi PHP & Node.js
+```bash
+# Install paket PHP / Laravel
+composer install
 
-## Code of Conduct
+# Install paket Frontend (Vite & Asset)
+npm install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 3. Konfigurasi Environment (`.env`)
+Salin file `.env.example` menjadi `.env` (jika belum ada):
+```bash
+cp .env.example .env
+```
+Buka file `.env` dan sesuaikan pengaturan database Anda:
+```env
+APP_NAME="FaceShop"
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
 
-## Security Vulnerabilities
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=web_kecantikan
+DB_USERNAME=root
+DB_PASSWORD=
+```
+*(Pastikan database `web_kecantikan` sudah dibuat di MySQL/phpMyAdmin)*.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 4. Generate Application Key & Storage Link
+```bash
+# Generate encryption key
+php artisan key:generate
 
-## License
+# Link storage publik untuk gambar produk/bukti transfer
+php artisan storage:link
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 5. Jalankan Migrasi & Seeder Database
+Untuk membuat tabel database beserta data dummy (produk, shade, dan akun pengujian):
+```bash
+php artisan migrate --seed
+```
+*(Gunakan `php artisan migrate:fresh --seed` jika ingin mereset ulang database dari awal)*.
 
-# web-kecantikan
+### 6. Menjalankan Server Aplikasi
+Jalankan dua perintah berikut di terminal terpisah:
+
+**Terminal 1 (Backend Server):**
+```bash
+php artisan serve
+```
+
+**Terminal 2 (Frontend Asset Bundler):**
+```bash
+npm run dev
+```
+
+Aplikasi sekarang dapat diakses melalui browser di: **[http://127.0.0.1:8000](http://127.0.0.1:8000)** 🎉
+
+---
+
+## 🔐 Akun Pengujian (Demo Accounts)
+
+Setelah menjalankan seeder, Anda dapat langsung login menggunakan akun default berikut:
+
+### 👤 Akun Admin
+- **URL Admin Panel**: `http://127.0.0.1:8000/admin`
+- **Email**: `admin@faceshop.test`
+- **Password**: `admin12345`
+
+### 👥 Akun Pelanggan (Customer)
+- **URL Login**: `http://127.0.0.1:8000/login`
+
+| Nama | Email | Password | Karakteristik Kulit |
+| :--- | :--- | :--- | :--- |
+| **Aulia Putri** | `aulia@example.com` | `password123` | Fair / Cool Undertone |
+| **Nadira Safitri** | `nadira@example.com` | `password123` | Light / Warm Undertone |
+| **Rani Maharani** | `rani@example.com` | `password123` | Medium / Neutral Undertone |
+| **Dewi Anggraini** | `dewi@example.com` | `password123` | Tan / Warm Undertone |
+| **Maya Lestari** | `maya@example.com` | `password123` | Deep / Warm Undertone |
+
+*(Atau klik menu **Daftar** untuk membuat akun baru)*.
+
+---
+
+## 📖 Panduan Penggunaan Fitur
+
+### 1. 🔍 Menggunakan AI Skin Tone Analyzer (Analisis Warna Kulit)
+1. Buka menu **Rekomendasi** atau navigasi ke `/skin-analysis`.
+2. Klik tombol **"Aktifkan Kamera"** dan berikan izin (*allow*) akses kamera pada browser.
+3. Posisikan wajah tepat di dalam area panduan lingkaran/oval kamera.
+4. Klik tombol **"Analisis Sekarang"**.
+5. Sistem akan membaca piksel warna kulit wajah dan menampilkan:
+   - Kategori *Skin Tone* (Fair / Light / Medium / Tan / Deep)
+   - Kategori *Undertone* (Cool / Warm / Neutral)
+   - Rekomendasi shade produk foundation yang paling cocok.
+
+### 2. 🪞 Menggunakan AR Virtual Try-On (Coba Makeup Virtual)
+- **Dari Hasil Analisis**: Klik salah satu shade rekomendasi dari panel hasil analisis untuk langsung melihat pengaplikasian warna pada wajah di kamera.
+- **Dari Detail Produk**: Buka halaman produk kosmetik, pilih varian shade, lalu klik tombol **"Try-On"** untuk menguji tampilan shade tersebut secara *real-time*.
+
+### 3. 🛍️ Belanja & Checkout
+1. Masukkan produk & shade yang diinginkan ke **Keranjang**.
+2. Buka halaman Keranjang (`/keranjang`) lalu klik **Checkout**.
+3. Lengkapi informasi pengiriman dan buat pesanan.
+4. Buka halaman **Pesanan Saya** (`/pesanan-saya`) untuk melihat nomor pesanan dan mengunggah bukti pembayaran.
+
+### 4. ⚙️ Mengelola Toko (Admin Panel)
+1. Buka `/admin` dan login dengan akun administrator.
+2. Fitur yang tersedia:
+   - **Dashboard**: Statistik pendapatan, jumlah pesanan, dan chart tren 7 & 30 hari.
+   - **Produk & Shade**: Tambah/edit produk, upload foto, dan atur kode warna HEX shade dengan interactive color picker.
+   - **Pesanan**: Verifikasi bukti pembayaran, ubah status pesanan (pending/proses/selesai/dibatalkan).
+
+---
+
+## 🛠️ Struktur Direktori Utama
+
+```
+web-kecantikan/
+├── app/
+│   ├── Filament/             # Admin panel resource, widget & pages
+│   ├── Http/Controllers/     # Controller web & API (Skin Analysis, Order, Produk, dll)
+│   └── Models/                  # Model Eloquent (User, Product, Shade, Order, dll)
+├── database/
+│   ├── migrations/           # Skema tabel database
+│   └── seeders/              # Data inisialisasi produk & akun demo
+├── public/
+│   └── assets/js/
+│       ├── face_detector.js        # MediaPipe Face Mesh tracking
+│       ├── skin_color_analyzer.js  # Algoritma HSV Skin Tone classifier
+│       ├── ar_canvas.js            # HTML5 Canvas AR foundation overlay
+│       └── skin_analysis.js        # UI Orchestrator
+├── resources/
+│   └── views/                # Template Blade (layout, home, produk, checkout, dll)
+└── routes/
+    └── web.php               # Rute halaman web & API endpoint
+```
+
+---
+
+## ❓ Troubleshooting (Masalah Umum)
+
+<details>
+<summary><b>1. Kamera tidak mau menyala di fitur Analisis / Try-On</b></summary>
+
+- Pastikan browser diberi izin untuk mengakses kamera (klik ikon gembok/kamera di samping URL browser ➔ Izinkan Kamera).
+- Pastikan tidak ada aplikasi lain (seperti Zoom, Teams, OBS) yang sedang menggunakan webcam.
+- Fitur kamera memerlukan environment yang aman (`http://localhost`, `http://127.0.0.1`, atau `https://`).
+</details>
+
+<details>
+<summary><b>2. Error `ext-intl is missing` saat composer install</b></summary>
+
+- Aktifkan baris `extension=intl` di file `php.ini` XAMPP Anda, kemudian simpan dan restart web server Apache.
+</details>
+
+<details>
+<summary><b>3. Gambar produk tidak tampil</b></summary>
+
+- Jalankan perintah `php artisan storage:link` di terminal untuk menghubungkan storage Laravel dengan folder publik.
+</details>
+
+---
+
+## 📄 Lisensi
+Proyek ini dikembangkan untuk keperluan aplikasi e-commerce kecantikan berbasis web menggunakan [Laravel Framework](https://laravel.com).
